@@ -18,3 +18,8 @@ class MeetingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Meet
         fields = ('id_meet', 'id_player', 'id_player1', 'result', 'date', 'round')
+
+class ClubSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Club
+        fields = ('id_club','club_name','club_info','club_logo','country')
