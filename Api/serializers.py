@@ -11,7 +11,8 @@ class PlayerSerializer(serializers.ModelSerializer):
 class TournamentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tournament
-        fields = ('id', 'name', 'address', 'data', 'Maxparticipants', 'mincategory', 'maxcategory', 'gamesystem')
+        fields = ('id', 'name', 'address', 'date', 'memberslimit', 'mincategory', 'maxcategory', 'pairingsystem', 'organiser', 'playtype', 'winpoints', 'losepoints', 'drawpoints',
+        'byepoints', 'country', 'category')
 
 
 class MeetingSerializer(serializers.ModelSerializer):
