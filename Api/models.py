@@ -35,3 +35,11 @@ class Meet(models.Model):
     result = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(2)])
     date = models.DateTimeField()
     round = models.IntegerField()
+
+    
+class Club(models.Model):
+    id_club = models.IntegerField(primary_key=True)
+    club_name = models.CharField(max_length=50)
+    club_info = models.TextField(max_length=500,blank=True)
+    club_logo = models.ImageField(upload_to='club_logo/')
+    country = models.CharField(max_length=60,blank=True)
