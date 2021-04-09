@@ -10,4 +10,6 @@ urlpatterns = [
     url(r'^api/player/(?P<pk>\d+)/$', PlayerViewSetDetail.as_view(), name='Player_Detail'),
     url(r'^api/tournament/$', TournamentViewSetList.as_view(), name='Tournament_List'),
     url(r'^api/tournament/(?P<pk>\d+)/$', TournamentViewSetDetail.as_view(), name='Tournament_Detail'),
+    url(r'^api/club/$', ClubViewSetList.as_view(), name='Club_List'),
+    url(r'^api/club/(?P<pk>\d+)/$', ClubViewSetDetail.as_view(), name='Club_Detail'),
 ]
