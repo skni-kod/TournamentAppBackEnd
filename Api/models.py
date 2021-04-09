@@ -1,15 +1,29 @@
 from django.db import models
 from datetime import datetime
 from django.utils import timezone
+from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
 
+class Club(models.Model):
+    id_club = models.IntegerField(primary_key=True)
+    club_name = models.CharField(max_length=50)
+    club_info = models.TextField(max_length=500,blank=True)
+    club_logo = models.ImageField(upload_to='club_logo/')
+    country = models.CharField(max_length=60,blank=True)
 
-class Player(models.Model):
-    name = models.CharField(max_length=200)
-    surname = models.CharField(max_length=200)
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    category = models.CharField(max_length=20)
     rating = models.IntegerField(blank=True, validators=[MinValueValidator(0)])
     country = models.CharField(max_length=60, blank=True)
-    club = models.CharField(max_length=200, blank=True)
+    gender = models.CharField(max_length=6, choices=(('M', 'Male'), ('F', 'Female')))
+    club = models.ForeignKey(Club, on_delete=models.DO_NOTHING, many=False)
+    email = models.EmailField()
+
+    def __str__(self):
+        return f'{self.user.first_name} {self.user.last_name}'
+
 
 
 class Tournament(models.Model):
@@ -54,29 +68,21 @@ class Tournament(models.Model):
     category = models.CharField(choices=CATEGORIES, max_length= 10, default="mixed")
 
 
-
-class Meet(models.Model):
-    id_meet = models.IntegerField(primary_key=True)
-    id_player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='+')
-    id_player1 = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='+')
-    result = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(2)])
-    date = models.DateTimeField()
-    round = models.IntegerField()
-
-
-class Image(models.Model):
-    file = models.ImageField(upload_to='/images')
+class Game(models.Model):
+    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE, many=False)
+    player1 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='+')
+    player2 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='+')
+    round_number = models.IntegerField()
+    date = models.DateTimeField
+    result = models.CharField(max_length=20, choices=(('P1W', f'{player1} won'), ('P1W', f'{player2} won')))
 
 
 class Gallery(models.Model):
     name = models.CharField(max_length=20)
-    images = models.ForeignKey(Image,on_delete=models.DO_NOTHING, many=True)
+
+
+class Image(models.Model):
+    file = models.ImageField(upload_to='/images')
+    gallery = models.ForeignKey(Gallery, on_delete=models.CASCADE, many=True)
 
     
-class Club(models.Model):
-    id_club = models.IntegerField(primary_key=True)
-    club_name = models.CharField(max_length=50)
-    club_info = models.TextField(max_length=500,blank=True)
-    club_logo = models.ImageField(upload_to='club_logo/')
-    country = models.CharField(max_length=60,blank=True)
-
