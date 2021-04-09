@@ -63,6 +63,15 @@ class Meet(models.Model):
     date = models.DateTimeField()
     round = models.IntegerField()
 
+
+class Image(models.Model):
+    file = models.ImageField(upload_to='/images')
+
+
+class Gallery(models.Model):
+    name = models.CharField(max_length=20)
+    images = models.ForeignKey(Image,on_delete=models.DO_NOTHING, many=True)
+
     
 class Club(models.Model):
     id_club = models.IntegerField(primary_key=True)
@@ -70,3 +79,4 @@ class Club(models.Model):
     club_info = models.TextField(max_length=500,blank=True)
     club_logo = models.ImageField(upload_to='club_logo/')
     country = models.CharField(max_length=60,blank=True)
+
