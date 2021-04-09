@@ -35,3 +35,12 @@ class Meet(models.Model):
     result = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(2)])
     date = models.DateTimeField()
     round = models.IntegerField()
+
+
+class Image(models.Model):
+    file = models.ImageField(upload_to='/images')
+
+
+class Gallery(models.Model):
+    name = models.CharField(max_length=20)
+    images = models.ForeignKey(Image,on_delete=models.DO_NOTHING, many=True)
