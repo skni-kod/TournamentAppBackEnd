@@ -25,6 +25,14 @@ class Profile(models.Model):
         return f'{self.user.first_name} {self.user.last_name}'
 
 
+class Gallery(models.Model):
+    name = models.CharField(max_length=20)
+
+
+class Image(models.Model):
+    file = models.ImageField(upload_to='/images')
+    gallery = models.ForeignKey(Gallery, on_delete=models.CASCADE, many=True)
+
 
 class Tournament(models.Model):
     name = models.CharField(max_length=200)
@@ -66,6 +74,7 @@ class Tournament(models.Model):
         (MIXED, 'mixed'),
     )
     category = models.CharField(choices=CATEGORIES, max_length= 10, default="mixed")
+    gallery = models.OneToOneField(Gallery, on_delete=models.CASCADE)
 
 
 class Game(models.Model):
@@ -77,12 +86,3 @@ class Game(models.Model):
     result = models.CharField(max_length=20, choices=(('P1W', f'{player1} won'), ('P1W', f'{player2} won')))
 
 
-class Gallery(models.Model):
-    name = models.CharField(max_length=20)
-
-
-class Image(models.Model):
-    file = models.ImageField(upload_to='/images')
-    gallery = models.ForeignKey(Gallery, on_delete=models.CASCADE, many=True)
-
-    
