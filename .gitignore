@@ -128,3 +128,8 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+Api/migrations/*
+Api/migrations/__init__.py
+Api/migrations/0001_initial.py
+/mediafolder/

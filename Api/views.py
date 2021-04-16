@@ -6,38 +6,38 @@ from Api.models import *
 from rest_framework.response import Response
 
 
-class PlayerViewSetList(APIView):
-    queryset = Player.objects.none()
+class ProfileViewSetList(APIView):
+    queryset = Profile.objects.none()
 
     def get(self, format=None):
-        queryset = Player.objects.all()
-        serializer = PlayerSerializer(queryset, many=True)
+        queryset = Profile.objects.all()
+        serializer = ProfileSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = PlayerSerializer(data=request.data)
+        serializer = ProfileSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class PlayerViewSetDetail(APIView):
+class ProfileViewSetDetail(APIView):
 
     def get_object(self, pk):
         try:
-            return Player.objects.get(pk=pk)
-        except Player.DoesNotExist:
+            return Profile.objects.get(pk=pk)
+        except Profile.DoesNotExist:
             raise Http404
 
     def get(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        serializer = PlayerSerializer(queryset)
+        serializer = ProfileSerializer(queryset)
         return Response(serializer.data)
 
     def put(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        serializer = PlayerSerializer(queryset)
+        serializer = ProfileSerializer(queryset)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -50,7 +50,7 @@ class PlayerViewSetDetail(APIView):
 
     def patch(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        serializer = PlayerSerializer(queryset, data=request.data, prtaial=True)
+        serializer = ProfileSerializer(queryset, data=request.data, prtaial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -58,10 +58,10 @@ class PlayerViewSetDetail(APIView):
 
 
 class TournamentViewSetList(APIView):
-    queryset = Tournament.objects.none()
+    queryset = TournamentInfo.objects.none()
 
     def get(self, format=None):
-        queryset = Tournament.objects.all()
+        queryset = TournamentInfo.objects.all()
         serializer = TournamentSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -77,8 +77,8 @@ class TournamentViewSetDetail(APIView):
 
     def get_object(self, pk):
         try:
-            return Tournament.objects.get(pk=pk)
-        except Tournament.DoesNotExist:
+            return TournamentInfo.objects.get(pk=pk)
+        except TournamentInfo.DoesNotExist:
             raise Http404
 
     def get(self, request, pk=None, format=None):
@@ -108,36 +108,36 @@ class TournamentViewSetDetail(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class MeetingViewSetList(APIView):
+class GameViewSetList(APIView):
 
     def get(self, format=None):
-        queryset = Meet.objects.all()
-        serializer = MeetingSerializer(queryset, many=True)
+        queryset = Game.objects.all()
+        serializer = GameSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = MeetingSerializer(data=request.data)
+        serializer = GameSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class MeetingViewSetDetail(APIView):
+class GameViewSetDetail(APIView):
     def get_object(self, pk):
         try:
-            return Meet.objects.get(id_meet=pk)
-        except Meet.DoesNotExist:
+            return Game.objects.get(pk=pk)
+        except Game.DoesNotExist:
             raise Http404
 
     def get(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        serializer = MeetingSerializer(queryset)
+        serializer = GameSerializer(queryset)
         return Response(serializer.data)
 
     def put(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        serializer = MeetingSerializer(queryset)
+        serializer = GameSerializer(queryset)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -150,11 +150,12 @@ class MeetingViewSetDetail(APIView):
 
     def patch(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        serializer = MeetingSerializer(queryset, data=request.data, prtaial=True)
+        serializer = GameSerializer(queryset, data=request.data, prtaial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ClubViewSetList(APIView):
 
@@ -172,9 +173,10 @@ class ClubViewSetList(APIView):
 
 
 class ClubViewSetDetail(APIView):
+
     def get_object(self, pk):
         try:
-            return Club.objects.get(id_meet=pk)
+            return Club.objects.get(pk=pk)
         except Club.DoesNotExist:
             raise Http404
 
@@ -203,3 +205,254 @@ class ClubViewSetDetail(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class GalleryViewSetList(APIView):
+
+    def get(self, format=None):
+        queryset = Gallery.objects.all()
+        serializer = GallerySerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = GallerySerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class GalleryViewSetDetail(APIView):
+    def get_object(self, pk):
+        try:
+            return Gallery.objects.get(pk=pk)
+        except Gallery.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk=None, format=None):
+        queryset = self.get_object(pk)
+        serializer = GallerySerializer(queryset)
+        return Response(serializer.data)
+
+    def put(self, request, pk=None, format=None):
+        queryset = self.get_object(pk)
+        serializer = GallerySerializer(queryset)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk=None, format=None):
+        queryset = self.get_object(pk)
+        queryset.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def patch(self, request, pk=None, format=None):
+        queryset = self.get_object(pk)
+        serializer = GallerySerializer(queryset, data=request.data, prtaial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ImageViewSetList(APIView):
+
+    def get(self, format=None):
+        queryset = Image.objects.all()
+        serializer = ImageSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = ImageSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ImageViewSetDetail(APIView):
+
+    def get_object(self, pk):
+        try:
+            return Image.objects.get(pk=pk)
+        except Image.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk=None, format=None):
+        queryset = self.get_object(pk)
+        serializer = ImageSerializer(queryset)
+        return Response(serializer.data)
+
+    def put(self, request, pk=None, format=None):
+        queryset = self.get_object(pk)
+        serializer = ImageSerializer(queryset)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk=None, format=None):
+        queryset = self.get_object(pk)
+        queryset.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def patch(self, request, pk=None, format=None):
+        queryset = self.get_object(pk)
+        serializer = ImageSerializer(queryset, data=request.data, prtaial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    class ImageViewSetList(APIView):
+
+        def get(self, format=None):
+            queryset = Image.objects.all()
+            serializer = ImageSerializer(queryset, many=True)
+            return Response(serializer.data)
+
+        def post(self, request):
+            serializer = ImageSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    class ImageViewSetDetail(APIView):
+
+        def get_object(self, pk):
+            try:
+                return Image.objects.get(pk=pk)
+            except Image.DoesNotExist:
+                raise Http404
+
+        def get(self, request, pk=None, format=None):
+            queryset = self.get_object(pk)
+            serializer = ImageSerializer(queryset)
+            return Response(serializer.data)
+
+        def put(self, request, pk=None, format=None):
+            queryset = self.get_object(pk)
+            serializer = ImageSerializer(queryset)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        def delete(self, request, pk=None, format=None):
+            queryset = self.get_object(pk)
+            queryset.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+        def patch(self, request, pk=None, format=None):
+            queryset = self.get_object(pk)
+            serializer = ImageSerializer(queryset, data=request.data, prtaial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class TournamentNotificationViewSetList(APIView):
+
+    def get(self, format=None):
+        queryset = TournamentNotification.objects.all()
+        serializer = TournamentNotificationSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = TournamentNotificationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class TournamentNotificationViewSetDetail(APIView):
+
+    def get_object(self, pk):
+        try:
+            return TournamentNotification.objects.get(pk=pk)
+        except Image.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk=None, format=None):
+        queryset = self.get_object(pk)
+        serializer = TournamentNotificationSerializer(queryset)
+        return Response(serializer.data)
+
+    def put(self, request, pk=None, format=None):
+        queryset = self.get_object(pk)
+        serializer = TournamentNotificationSerializer(queryset)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk=None, format=None):
+        queryset = self.get_object(pk)
+        queryset.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def patch(self, request, pk=None, format=None):
+        queryset = self.get_object(pk)
+        serializer = TournamentNotificationSerializer(queryset, data=request.data, prtaial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PlayerInTournamentResultViewSetList(APIView):
+
+    def get(self, format=None):
+        queryset = PlayerInTournamentResult.objects.all()
+        serializer = PlayerInTournamentResultSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = PlayerInTournamentResultSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PlayerInTournamentResultViewSetDetail(APIView):
+
+    def get_object(self, pk):
+        try:
+            return PlayerInTournamentResult.objects.get(pk=pk)
+        except Image.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk=None, format=None):
+        queryset = self.get_object(pk)
+        serializer = PlayerInTournamentResultSerializer(queryset)
+        return Response(serializer.data)
+
+    def put(self, request, pk=None, format=None):
+        queryset = self.get_object(pk)
+        serializer = PlayerInTournamentResultSerializer(queryset)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk=None, format=None):
+        queryset = self.get_object(pk)
+        queryset.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def patch(self, request, pk=None, format=None):
+        queryset = self.get_object(pk)
+        serializer = PlayerInTournamentResultSerializer(queryset, data=request.data, prtaial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
