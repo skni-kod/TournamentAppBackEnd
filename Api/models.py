@@ -97,11 +97,11 @@ class TournamentInfo(models.Model):
 
 
 class Game(models.Model):
-    tournament = models.ForeignKey(TournamentInfo, on_delete=models.CASCADE, related_name='games')
+    tournament = models.ForeignKey(TournamentInfo, on_delete=models.CASCADE, related_name='tournament')
     player1 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='player1')
     player2 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='player2')
     round_number = models.IntegerField()
-    date = models.DateTimeField
+    date = models.DateTimeField(blank=True, null=True)
     result = models.CharField(max_length=20, blank=True, choices=(('P1W', f'{player1} won'), ('P1W', f'{player2} won')))
 
     def __str__(self):

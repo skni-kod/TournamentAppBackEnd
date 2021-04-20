@@ -14,6 +14,8 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'password': {'write_only': True}
         }
+    def get_is_admin_user(self, obj):
+        return obj.is_staff
 
 
 class ClubSerializer(serializers.ModelSerializer):
@@ -23,10 +25,11 @@ class ClubSerializer(serializers.ModelSerializer):
 
 
 class ProfileWithoutUserSerializer(serializers.ModelSerializer):
+    club = ClubSerializer()
+
     class Meta:
         model = Profile
-        club = ClubSerializer
-        fields = ('id', 'category', 'rating', 'country', 'gender', 'club' )
+        fields = ('id', 'category', 'rating', 'country', 'gender', 'club')
 
 
 class ImageSerializer(serializers.ModelSerializer):
@@ -51,40 +54,47 @@ class GallerySerializer(serializers.ModelSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    club = ClubSerializer()
+
     class Meta:
         model = Profile
-        club = ClubSerializer
-        fields = ('id', 'first_name', 'surname', 'rating', 'country', 'club')
+        fields = ('id', 'user', 'rating', 'country', 'club')
 
 
 class TournamentSerializer(serializers.ModelSerializer):
+    gallery = GallerySerializer()
+
     class Meta:
         model = TournamentInfo
-        gallery = GallerySerializer
         fields = ('id', 'name', 'address', 'date', 'memberslimit', 'pairingsystem', 'organiser', 'playtype', 'winpoints', 'losepoints', 'drawpoints',
         'byepoints', 'country', 'mincategory', 'maxcategory', 'category', 'gallery')
 
 
 class GameSerializer(serializers.ModelSerializer):
-    tournament = TournamentSerializer
-    player1 = ProfileSerializer
-    player2 = ProfileSerializer
+    tournament = TournamentSerializer()
+    player1 = ProfileWithoutUserSerializer()
+    player2 = ProfileWithoutUserSerializer()
 
     class Meta:
         model = Game
         fields = ('id', 'tournament', 'player1', 'player2', 'round_number', 'result', 'date')
 
 
-
 class TournamentNotificationSerializer(serializers.ModelSerializer):
-    player = ProfileSerializer
-    tournament = TournamentSerializer
+    player = ProfileSerializer()
+    tournament = TournamentSerializer()
+
     class Meta:
+        model = TournamentNotification
         fields = ('id', 'player', 'tournament')
 
 
 class PlayerInTournamentResultSerializer(serializers.ModelSerializer):
-    player = ProfileSerializer
-    tournament = TournamentSerializer
+    player = ProfileSerializer()
+    tournament = TournamentSerializer()
+
     class Meta:
+        model = PlayerInTournamentResult
         fields = ('id', 'pointsstatus', 'player', 'tournament')
+
