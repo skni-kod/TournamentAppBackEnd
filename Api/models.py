@@ -1,13 +1,57 @@
 from datetime import datetime
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User,AbstractUser, BaseUserManager
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 from sorl.thumbnail import ImageField
+from django.utils.translation import ugettext_lazy as _
 
+"""CUSTOM USER MODEL"""
+class CustomUserManager(BaseUserManager):
+
+
+    def _create_user(self, email, password=None, **extra_fields):
+        """Tworzenie i zapisywanie usera z podanym mailem i hasłem"""""
+        if not email:
+            raise ValueError('No email')
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_user(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', False)
+        extra_fields.setdefault('is_superuser', False)
+        return self._create_user(email, password, **extra_fields)
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        """Create and save a SuperUser with the given email and password."""
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
+
+        return self._create_user(email, password, **extra_fields)
+
+
+class CustomUser(AbstractUser):
+    username = None
+    email = models.EmailField(_('email address'), unique=True)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
+    objects = CustomUserManager()
+
+
+"##################################################################"
 
 class Club(models.Model):
     club_name = models.CharField(max_length=50)
@@ -20,7 +64,7 @@ class Club(models.Model):
 
 
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='profile')
     category = models.CharField(max_length=20, blank=True)
     rating = models.IntegerField(null=True, blank=True)
     country = models.CharField(max_length=60, blank=True)

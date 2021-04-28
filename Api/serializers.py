@@ -7,15 +7,29 @@ from .models import *
 class UserSerializer(serializers.ModelSerializer):
     is_admin_user = serializers.SerializerMethodField()
     class Meta:
-        model = User
-        fields = ('id', 'username', 'email', 'groups', 'profile', 'password',
+        model = CustomUser
+        fields = ('id', 'email', 'profile', 'password',
                   'first_name', 'last_name', 'is_admin_user')
-        read_only_fields = ('profile', 'groups')
+        read_only_fields = ('profile',)
         extra_kwargs = {
             'password': {'write_only': True}
         }
     def get_is_admin_user(self, obj):
         return obj.is_staff
+
+    def create(self,validated_data):
+        user = CustomUser.objects.create_user(
+            email=validated_data['email'],
+        )
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
+
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ('id', 'email', 'profile', 'first_name', 'last_name')
+        read_only_fields = ('profile',)
 
 
 class ClubSerializer(serializers.ModelSerializer):
@@ -97,4 +111,6 @@ class PlayerInTournamentResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlayerInTournamentResult
         fields = ('id', 'pointsstatus', 'player', 'tournament')
+
+
 
