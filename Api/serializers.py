@@ -104,8 +104,8 @@ class ShortTournamentSerializer(serializers.ModelSerializer):
 
 class GameSerializer(serializers.ModelSerializer):
     tournament = ShortTournamentSerializer()
-    player1 = ProfileWithoutUserSerializer()
-    player2 = ProfileWithoutUserSerializer()
+    player1 = ShortUserSerializer()
+    player2 = ShortUserSerializer()
 
     class Meta:
         model = Game
