@@ -24,8 +24,7 @@ urlpatterns = [
     url(r'^api/tournament_notification/(?P<pk>\d+)/$', ProfileViewSetDetail.as_view(), name='Tournament_Notification_Detail'),
     url(r'^api/player_result/$', PlayerInTournamentResultViewSetList.as_view(), name='Player_Result_List'),
     url(r'^api/player_result/(?P<pk>\d+)/$', PlayerInTournamentResultViewSetDetail.as_view(), name='Player_Result_Detail'),
-
-
     url(r'^api/user/(?P<pk>\d+)/$', UserViewSetDetail.as_view(), name='User_Detail'),
-    url(r'^api/user/list/$', UserViewSetList.as_view(), name='User_List'),
+    url(r'^api/user/$', UserViewSetList.as_view(), name='User_List'),
+    url(r'^api/player_games/$', PlayerGamesViewSetList.as_view(), name='Player_games'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

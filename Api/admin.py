@@ -12,6 +12,8 @@ admin.site.register(Gallery)
 admin.site.register(TournamentInfo)
 admin.site.register(TournamentNotification)
 admin.site.register(PlayerInTournamentResult)
+admin.site.register(Judge)
+
 
 class CustomUserAdmin(UserAdmin):
 
