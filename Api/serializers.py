@@ -41,6 +41,14 @@ class ShortUserSerializer(serializers.ModelSerializer):
         fields = ('email', 'first_name', 'last_name')
 
 
+class ProfileForGameSerializer(serializers.ModelSerializer):
+    user = ShortUserSerializer()
+
+    class Meta:
+        model = Profile
+        fields = ('id', 'user', 'rating', 'country', 'club')
+
+
 class ClubSerializer(serializers.ModelSerializer):
     class Meta:
         model = Club
@@ -104,8 +112,8 @@ class ShortTournamentSerializer(serializers.ModelSerializer):
 
 class GameSerializer(serializers.ModelSerializer):
     tournament = ShortTournamentSerializer()
-    player1 = ShortUserSerializer()
-    player2 = ShortUserSerializer()
+    player1 = ProfileForGameSerializer()
+    player2 = ProfileForGameSerializer()
 
     class Meta:
         model = Game
