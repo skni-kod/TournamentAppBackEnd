@@ -454,8 +454,6 @@ class PlayerInTournamentResultViewSetDetail(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
-
 class UserViewSetDetail(APIView):
     queryset = CustomUser.objects.none()
 
@@ -511,7 +509,6 @@ class UserViewSetList(APIView):
 class PlayerGamesViewSetList(APIView):
     queryset = Profile.objects.none()
 
-
     def get(self, format=None):
         queryset = Profile.objects.all()
         serializer = PlayerGamesSerializer(queryset, many=True)
@@ -523,3 +520,47 @@ class PlayerGamesViewSetList(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class TournamentGamesViewSetDetail(APIView):
+
+    def get_object(self, pk):
+        try:
+            return TournamentInfo.objects.get(pk=pk)
+        except TournamentInfo.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk=None, format=None):
+        queryset = self.get_object(pk)
+        serializer = TournamentGamesSerializer(queryset)
+        return Response(serializer.data)
+
+
+class TournamentGamesViewSetList(APIView):
+
+    def get(self, format=None):
+        queryset = TournamentInfo.objects.all()
+        serializer = TournamentGamesSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class TournamentPlayerResultViewSetDetail(APIView):
+
+    def get_object(self, pk):
+        try:
+            return TournamentInfo.objects.get(pk=pk)
+        except TournamentInfo.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk=None, format=None):
+        queryset = self.get_object(pk)
+        serializer = TournamentPlayerResultSerializer(queryset)
+        return Response(serializer.data)
+
+
+class TournamentPlayerResultViewSetList(APIView):
+
+    def get(self, format=None):
+        queryset = TournamentInfo.objects.all()
+        serializer = TournamentPlayerResultSerializer(queryset, many=True)
+        return Response(serializer.data)

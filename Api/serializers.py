@@ -146,3 +146,19 @@ class PlayerInTournamentResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlayerInTournamentResult
         fields = ('id', 'points_status', 'tournament', 'player_games')
+
+
+class TournamentGamesSerializer(serializers.ModelSerializer):
+    game = GameSerializer(many=True, source='tournament')
+
+    class Meta:
+        model = TournamentInfo
+        fields = ('id', 'game')
+
+
+class TournamentPlayerResultSerializer(serializers.ModelSerializer):
+    result = PlayerInTournamentResultSerializer(many=True, source='player_results')
+
+    class Meta:
+        model = TournamentInfo
+        fields = ('id', 'result')
