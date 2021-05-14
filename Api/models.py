@@ -116,7 +116,7 @@ class TournamentInfo(models.Model):
     organiser = models.CharField(max_length=200, blank=True)
     CHOICES = (
         ('RR', 'round-robin'),
-        ('LABEL', 'label'),
+        ('LADDER', 'ladder'),
         ('GROUPS', 'groups'),
     )
     play_type = models.CharField(choices=CHOICES, max_length=20, default="RR")
@@ -143,8 +143,8 @@ class PlayerInTournamentResult(models.Model):
 
 class Game(models.Model):
     tournament = models.ForeignKey(TournamentInfo, on_delete=models.CASCADE, related_name='tournament')
-    player1 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='player1')
-    player2 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='player2')
+    player1 = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=True, null=True, related_name='player1')
+    player2 = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=True, null=True, related_name='player2')
     results = (('0', 'Match not yet played'),
                ('1', f'{player1} Won'),
                ('2', f'{player2} Won'),
