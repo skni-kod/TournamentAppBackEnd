@@ -1,3 +1,6 @@
+import random
+
+import numpy
 from django.http import Http404
 from rest_framework import status
 from rest_framework.views import APIView
@@ -50,7 +53,7 @@ class ProfileViewSetDetail(APIView):
 
     def patch(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        serializer = ProfileSerializer(queryset, data=request.data, prtaial=True)
+        serializer = ProfileSerializer(queryset, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -66,7 +69,7 @@ class TournamentViewSetList(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = TournamentSerializer(data=request.data)
+        serializer = TournamentSaveSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -88,7 +91,7 @@ class TournamentViewSetDetail(APIView):
 
     def put(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        serializer = TournamentSerializer(queryset)
+        serializer = TournamentSaveSerializer(queryset)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -101,7 +104,7 @@ class TournamentViewSetDetail(APIView):
 
     def patch(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        serializer = TournamentSerializer(queryset, data=request.data, prtaial=True)
+        serializer = TournamentSaveSerializer(queryset, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -150,7 +153,7 @@ class GameViewSetDetail(APIView):
 
     def patch(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        serializer = GameSerializer(queryset, data=request.data, prtaial=True)
+        serializer = GameSerializer(queryset, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -200,7 +203,7 @@ class ClubViewSetDetail(APIView):
 
     def patch(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        serializer = ClubSerializer(queryset, data=request.data, prtaial=True)
+        serializer = ClubSerializer(queryset, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -249,7 +252,7 @@ class GalleryViewSetDetail(APIView):
 
     def patch(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        serializer = GallerySerializer(queryset, data=request.data, prtaial=True)
+        serializer = GallerySerializer(queryset, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -299,7 +302,7 @@ class ImageViewSetDetail(APIView):
 
     def patch(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        serializer = ImageSerializer(queryset, data=request.data, prtaial=True)
+        serializer = ImageSerializer(queryset, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -347,7 +350,7 @@ class ImageViewSetDetail(APIView):
 
         def patch(self, request, pk=None, format=None):
             queryset = self.get_object(pk)
-            serializer = ImageSerializer(queryset, data=request.data, prtaial=True)
+            serializer = ImageSerializer(queryset, data=request.data, partial=True)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
@@ -397,7 +400,7 @@ class TournamentNotificationViewSetDetail(APIView):
 
     def patch(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        serializer = TournamentNotificationSerializer(queryset, data=request.data, prtaial=True)
+        serializer = TournamentNotificationSerializer(queryset, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -447,7 +450,7 @@ class PlayerInTournamentResultViewSetDetail(APIView):
 
     def patch(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        serializer = PlayerInTournamentResultSerializer(queryset, data=request.data, prtaial=True)
+        serializer = PlayerInTournamentResultSerializer(queryset, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -564,3 +567,115 @@ class TournamentPlayerResultViewSetList(APIView):
         queryset = TournamentInfo.objects.all()
         serializer = TournamentPlayerResultSerializer(queryset, many=True)
         return Response(serializer.data)
+
+
+class TournamentPlayerNotificationsViewSetList(APIView):
+
+    def get(self, format=None):
+        queryset = TournamentInfo.objects.all()
+        serializer = TournamentPlayerNotificationsSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class GenerateTournamentLadder(APIView):
+
+    def get_object(self, pk):
+        try:
+            return TournamentInfo.objects.get(pk=pk)
+        except TournamentInfo.DoesNotExist:
+            raise Http404
+
+    def przetasowanie(self, lista):
+        wynik = [lista[0]]
+        for n in range(len(lista) - 1):
+            if n == 0:
+                wynik.append(lista[-1])
+            else:
+                wynik.append(lista[n])
+        return wynik
+
+    def get(self, request, pk=None, format=None):
+        queryset = self.get_object(pk)
+        serializer = TournamentPlayerNotificationsSerializer(queryset)
+        return Response(serializer.data)
+
+    def put(self, request, pk, format=None):
+        queryset = self.get_object(pk)
+        notifications = TournamentNotification.objects.all().filter(tournament=pk)
+        notification_number = notifications.count()
+        notifications = list(notifications)
+        random.shuffle(notifications)
+        if not Game.objects.filter(tournament=queryset).exists():
+            if queryset.play_type == 'LADDER':
+                rounds_number = int(numpy.ceil(numpy.log2(notification_number)))
+                one_player = 2 ** rounds_number - notification_number
+                gamesr1 = int((2 ** rounds_number) / 2)
+                half_gamesr1 = gamesr1 / 2
+                for r in range(rounds_number):
+                    if r == 0:
+                        for n in range(gamesr1):
+                            if one_player > 0:
+                                if half_gamesr1 > n >= (half_gamesr1 - int(one_player/2)):
+                                    player = random.choice(notifications)
+                                    Game.objects.create(tournament=queryset, player1=player.player, player2=None, round_number=1, result='1')
+                                    notifications.remove(player)
+                                    print('mniejsze')
+                                elif n >= half_gamesr1 and n >= (gamesr1-int(one_player/2)-1):
+                                    player = random.choice(notifications)
+                                    Game.objects.create(tournament=queryset, player1=player.player, player2=None, round_number=1, result='1')
+                                    notifications.remove(player)
+                                    print('wieksze')
+                                else:
+                                    if len(notifications) > 1:
+                                        while True:
+                                            player1 = random.choice(notifications)
+                                            player2 = random.choice(notifications)
+                                            if player1 != player2:
+                                                break
+                                        Game.objects.create(tournament=queryset, player1=player1.player, player2=player2.player, round_number=1, result='0')
+                                        notifications.remove(player1)
+                                        notifications.remove(player2)
+                                        print('podwojne')
+                                print('koniec')
+                            else:
+                                if len(notifications) > 0:
+                                    while True:
+                                        player1 = random.choice(notifications)
+                                        player2 = random.choice(notifications)
+                                        if player1 != player2:
+                                            break
+                                    Game.objects.create(tournament=queryset, player1=player1.player, player2=player2.player, round_number=1, result='0')
+                                    notifications.remove(player1)
+                                    notifications.remove(player2)
+                    else:
+                        for n in range(2**(r-1)):
+                            Game.objects.create(tournament=queryset, round_number=r+1, result='0')
+
+            if queryset.play_type == 'RR':
+                s = []
+                if len(notifications) % 2 == 1:
+                    notifications.append("")
+                rounds_number = notification_number - 1
+                for i in range(rounds_number):
+                    if len(notifications) % 2 == 1:
+                        notifications.append("")
+                    mid = int(len(notifications) / 2)
+                    lista1 = notifications[:mid]
+                    lista2 = notifications[mid:]
+                    lista2.reverse()
+                    for n in range(mid):
+                        if lista1[n] == "":
+                            Game.objects.create(tournament=queryset, player1=lista2[n].player, round_number=1, result='1')
+                        elif lista2[n] == "":
+                            Game.objects.create(tournament=queryset, player1=lista1[n].player, round_number=1, result='1')
+                        else:
+                            Game.objects.create(tournament=queryset, player1=lista1[n].player, player2=lista2[n].player,  round_number=1, result='1')
+                        s.append([lista1[n], lista2[n]])
+                    notifications = self.przetasowanie(notifications)
+        return Response()
+
+    def delete(self, request, pk):
+        queryset = self.get_object(pk)
+        games = Game.objects.filter(tournament=queryset)
+        queryset.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
