@@ -162,3 +162,21 @@ class TournamentPlayerResultSerializer(serializers.ModelSerializer):
     class Meta:
         model = TournamentInfo
         fields = ('id', 'result')
+
+
+class TournamentPlayerNotificationsSerializer(serializers.ModelSerializer):
+    notification = TournamentNotificationSerializer(many=True, source='notifications')
+
+    class Meta:
+        model = TournamentInfo
+        fields = ('id', 'notification')
+
+
+class TournamentSaveSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TournamentInfo
+        fields = (
+            'id', 'name', 'address', 'date', 'members_limit', 'pairing_system', 'organiser', 'play_type', 'win_points',
+            'lose_points', 'draw_points',
+            'bye_points', 'country', 'gallery', 'judge')
