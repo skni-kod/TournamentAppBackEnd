@@ -31,5 +31,7 @@ urlpatterns = [
     url(r'^api/tournament_games/$', TournamentGamesViewSetList.as_view(), name='Tournament_Games'),
     url(r'^api/tournament_player_result/(?P<pk>\d+)/$', TournamentPlayerResultViewSetDetail.as_view(), name='Tournament_Player_Result'),
     url(r'^api/tournament_player_result/$', TournamentPlayerResultViewSetList.as_view(), name='Tournament_Player_Result'),
+    url(r'^api/tournament_player_notifications/$', TournamentPlayerNotificationsViewSetList.as_view(), name='Tournament_Player_Notifications'),
+    url(r'^api/generate/(?P<pk>\d+)/$', GenerateTournamentLadder.as_view(), name='generate')
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
