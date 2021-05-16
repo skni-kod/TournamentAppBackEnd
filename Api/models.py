@@ -105,7 +105,7 @@ class Image(models.Model):
 class TournamentInfo(models.Model):
     name = models.CharField(max_length=200)
     address = models.CharField(max_length=200, blank=True)
-    date = models.DateTimeField(default=datetime.today(), validators=[MinValueValidator(timezone.now())])
+    date = models.DateTimeField()
     members_limit = models.IntegerField(validators=[MinValueValidator(2)], default=2)
     PAIRING = (
         ('random', 'random'),
