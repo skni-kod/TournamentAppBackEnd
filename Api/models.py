@@ -107,12 +107,6 @@ class TournamentInfo(models.Model):
     address = models.CharField(max_length=200, blank=True)
     date = models.DateTimeField()
     members_limit = models.IntegerField(validators=[MinValueValidator(2)], default=2)
-    PAIRING = (
-        ('random', 'random'),
-        ('netherland', 'netherland'),
-        ('monrad', 'monrad'),
-    )
-    pairing_system = models.CharField(choices=PAIRING, max_length=30, default="random")
     organiser = models.CharField(max_length=200, blank=True)
     CHOICES = (
         ('RR', 'round-robin'),
