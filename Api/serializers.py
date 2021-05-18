@@ -99,7 +99,7 @@ class TournamentSerializer(serializers.ModelSerializer):
     class Meta:
         model = TournamentInfo
         fields = (
-            'id', 'name', 'address', 'date', 'members_limit', 'pairing_system', 'organiser', 'play_type', 'win_points',
+            'id', 'name', 'address', 'date', 'members_limit', 'organiser', 'play_type', 'win_points',
             'lose_points', 'draw_points',
             'bye_points', 'country', 'gallery', 'judge')
 
@@ -177,6 +177,6 @@ class TournamentSaveSerializer(serializers.ModelSerializer):
     class Meta:
         model = TournamentInfo
         fields = (
-            'id', 'name', 'address', 'date', 'members_limit', 'pairing_system', 'organiser', 'play_type', 'win_points',
+            'id', 'name', 'address', 'date', 'members_limit', 'organiser', 'play_type', 'win_points',
             'lose_points', 'draw_points',
             'bye_points', 'country', 'gallery', 'judge')
