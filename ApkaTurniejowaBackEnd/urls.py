@@ -3,7 +3,11 @@ from django.conf.urls import url
 from django.conf.urls.static import static
 from Api.views import *
 from . import settings
-
+from django.contrib.auth import views
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 
 urlpatterns = [
@@ -28,4 +32,11 @@ urlpatterns = [
 
     url(r'^api/user/(?P<pk>\d+)/$', UserViewSetDetail.as_view(), name='User_Detail'),
     url(r'^api/user/list/$', UserViewSetList.as_view(), name='User_List'),
+
+
+    url(r'^api/token/$', TokenObtainView.as_view(),name='token_obtain'),
+    url(r'^api/token/refresh/$', TokenRefreshView.as_view(),name='token_refresh'),
+    url(r'^api/user/test/$',TestView.as_view(),name='test'),
+
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

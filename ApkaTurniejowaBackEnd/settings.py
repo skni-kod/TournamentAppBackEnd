@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'Api',
+    'rest_framework.authtoken',
     'sorl.thumbnail',
     'sorl_thumbnail_serializer'
 ]
@@ -58,7 +59,7 @@ ROOT_URLCONF = 'ApkaTurniejowaBackEnd.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
+        'DIRS': [BASE_DIR / 'Api/templates']
         ,
         'APP_DIRS': True,
         'OPTIONS': {
@@ -128,3 +129,13 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "mediafolder")
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfolder")
 
 AUTH_USER_MODEL = 'Api.CustomUser'
+
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ]
+}

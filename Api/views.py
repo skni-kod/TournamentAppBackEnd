@@ -4,6 +4,11 @@ from rest_framework.views import APIView
 from Api.serializers import *
 from Api.models import *
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.permissions import AllowAny
+
 
 
 class ProfileViewSetList(APIView):
@@ -505,3 +510,19 @@ class UserViewSetList(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class TokenObtainView(TokenObtainPairView):
+
+    permission_classes = (AllowAny,)
+
+    serializer_class = TokenObtainSerializer
+
+class TestView(APIView):
+
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, format=None):
+        queryset = CustomUser.objects.all()
+        serializer = UserSerializer(queryset,many=True)
+        return Response(serializer.data)

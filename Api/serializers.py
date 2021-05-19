@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from sorl_thumbnail_serializer.fields import HyperlinkedSorlImageField
-
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import *
 
 
@@ -114,3 +114,11 @@ class PlayerInTournamentResultSerializer(serializers.ModelSerializer):
 
 
 
+class TokenObtainSerializer(TokenObtainPairSerializer):
+
+    @classmethod
+    def get_token(cls, CustomUser):
+        token = super(TokenObtainSerializer,cls).get_token(CustomUser)
+
+        token['email'] = CustomUser.email
+        return token
