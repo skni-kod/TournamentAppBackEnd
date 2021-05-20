@@ -6,18 +6,20 @@ from .models import *
 
 class UserSerializer(serializers.ModelSerializer):
     is_admin_user = serializers.SerializerMethodField()
+
     class Meta:
         model = CustomUser
-        fields = ('id', 'email', 'profile', 'password',
+        fields = ('email', 'profile', 'password',
                   'first_name', 'last_name', 'is_admin_user')
         read_only_fields = ('profile',)
         extra_kwargs = {
             'password': {'write_only': True}
         }
+
     def get_is_admin_user(self, obj):
         return obj.is_staff
 
-    def create(self,validated_data):
+    def create(self, validated_data):
         user = CustomUser.objects.create_user(
             email=validated_data['email'],
         )
@@ -25,11 +27,26 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
+
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ('id', 'email', 'profile', 'first_name', 'last_name')
         read_only_fields = ('profile',)
+
+
+class ShortUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ('email', 'first_name', 'last_name')
+
+
+class ProfileForGameSerializer(serializers.ModelSerializer):
+    user = ShortUserSerializer()
+
+    class Meta:
+        model = Profile
+        fields = ('id', 'user', 'rating', 'country', 'club')
 
 
 class ClubSerializer(serializers.ModelSerializer):
@@ -64,7 +81,7 @@ class GallerySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Gallery
-        fields = ('id', 'name', 'image')
+        fields = ('id', 'image')
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -81,18 +98,26 @@ class TournamentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TournamentInfo
-        fields = ('id', 'name', 'address', 'date', 'memberslimit', 'pairingsystem', 'organiser', 'playtype', 'winpoints', 'losepoints', 'drawpoints',
-        'byepoints', 'country', 'mincategory', 'maxcategory', 'category', 'gallery')
+        fields = (
+            'id', 'name', 'address', 'date', 'members_limit', 'organiser', 'play_type', 'win_points',
+            'lose_points', 'draw_points',
+            'bye_points', 'country', 'gallery', 'judge')
+
+
+class ShortTournamentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TournamentInfo
+        fields = ('id', 'name')
 
 
 class GameSerializer(serializers.ModelSerializer):
-    tournament = TournamentSerializer()
-    player1 = ProfileWithoutUserSerializer()
-    player2 = ProfileWithoutUserSerializer()
+    tournament = ShortTournamentSerializer()
+    player1 = ProfileForGameSerializer()
+    player2 = ProfileForGameSerializer()
 
     class Meta:
         model = Game
-        fields = ('id', 'tournament', 'player1', 'player2', 'round_number', 'result', 'date')
+        fields = ('id', 'tournament', 'player1', 'player2', 'round_number', 'result')
 
 
 class TournamentNotificationSerializer(serializers.ModelSerializer):
@@ -104,14 +129,31 @@ class TournamentNotificationSerializer(serializers.ModelSerializer):
         fields = ('id', 'player', 'tournament')
 
 
+class PlayerGamesSerializer(serializers.ModelSerializer):
+    game1 = GameSerializer(many=True, source='player1')
+    game2 = GameSerializer(many=True, source='player2')
+    user = ShortUserSerializer()
+
+    class Meta:
+        model = Profile
+        fields = ('id', 'user', 'game1', 'game2')
+
+
 class PlayerInTournamentResultSerializer(serializers.ModelSerializer):
-    player = ProfileSerializer()
-    tournament = TournamentSerializer()
+    player_games = PlayerGamesSerializer(source='player')
+    tournament = ShortTournamentSerializer()
 
     class Meta:
         model = PlayerInTournamentResult
-        fields = ('id', 'pointsstatus', 'player', 'tournament')
+        fields = ('id', 'points_status', 'tournament', 'player_games')
 
+
+class TournamentGamesSerializer(serializers.ModelSerializer):
+    game = GameSerializer(many=True, source='tournament')
+    
+    class Meta:
+        model = TournamentInfo
+        fields = ('id', 'game')
 
 
 class TokenObtainSerializer(TokenObtainPairSerializer):
@@ -122,3 +164,30 @@ class TokenObtainSerializer(TokenObtainPairSerializer):
 
         token['email'] = CustomUser.email
         return token
+
+
+class TournamentPlayerResultSerializer(serializers.ModelSerializer):
+    result = PlayerInTournamentResultSerializer(many=True, source='player_results')
+
+    class Meta:
+        model = TournamentInfo
+        fields = ('id', 'result')
+
+
+class TournamentPlayerNotificationsSerializer(serializers.ModelSerializer):
+    notification = TournamentNotificationSerializer(many=True, source='notifications')
+
+    class Meta:
+        model = TournamentInfo
+        fields = ('id', 'notification')
+
+
+class TournamentSaveSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TournamentInfo
+        fields = (
+            'id', 'name', 'address', 'date', 'members_limit', 'organiser', 'play_type', 'win_points',
+            'lose_points', 'draw_points',
+            'bye_points', 'country', 'gallery', 'judge')
+
