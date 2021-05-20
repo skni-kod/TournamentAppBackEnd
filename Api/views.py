@@ -18,7 +18,7 @@ class ProfileViewSetList(APIView):
     queryset = Profile.objects.none()
 
     def get(self, format=None):
-        queryset = Profile.objects.all()
+        queryset = Profile.objects.all().order_by('id')
         serializer = ProfileSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -69,7 +69,7 @@ class TournamentViewSetList(APIView):
     queryset = TournamentInfo.objects.none()
 
     def get(self, format=None):
-        queryset = TournamentInfo.objects.all()
+        queryset = TournamentInfo.objects.all().order_by('id')
         serializer = TournamentSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -119,7 +119,7 @@ class TournamentViewSetDetail(APIView):
 class GameViewSetList(APIView):
 
     def get(self, format=None):
-        queryset = Game.objects.all()
+        queryset = Game.objects.all().order_by('id')
         serializer = GameSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -168,7 +168,7 @@ class GameViewSetDetail(APIView):
 class ClubViewSetList(APIView):
 
     def get(self, format=None):
-        queryset = Club.objects.all()
+        queryset = Club.objects.all().order_by('id')
         serializer = ClubSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -218,7 +218,7 @@ class ClubViewSetDetail(APIView):
 class GalleryViewSetList(APIView):
 
     def get(self, format=None):
-        queryset = Gallery.objects.all()
+        queryset = Gallery.objects.all().order_by('id')
         serializer = GallerySerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -267,7 +267,7 @@ class GalleryViewSetDetail(APIView):
 class ImageViewSetList(APIView):
 
     def get(self, format=None):
-        queryset = Image.objects.all()
+        queryset = Image.objects.all().order_by('id')
         serializer = ImageSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -316,7 +316,7 @@ class ImageViewSetDetail(APIView):
     class ImageViewSetList(APIView):
 
         def get(self, format=None):
-            queryset = Image.objects.all()
+            queryset = Image.objects.all().order_by('id')
             serializer = ImageSerializer(queryset, many=True)
             return Response(serializer.data)
 
@@ -365,7 +365,7 @@ class ImageViewSetDetail(APIView):
 class TournamentNotificationViewSetList(APIView):
 
     def get(self, format=None):
-        queryset = TournamentNotification.objects.all()
+        queryset = TournamentNotification.objects.all().order_by('id')
         serializer = TournamentNotificationSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -415,7 +415,7 @@ class TournamentNotificationViewSetDetail(APIView):
 class PlayerInTournamentResultViewSetList(APIView):
 
     def get(self, format=None):
-        queryset = PlayerInTournamentResult.objects.all()
+        queryset = PlayerInTournamentResult.objects.all().order_by('id')
         serializer = PlayerInTournamentResultSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -502,7 +502,7 @@ class UserViewSetList(APIView):
     queryset = CustomUser.objects.none()
 
     def get(self, format=None):
-        queryset = CustomUser.objects.all().order_by('-date_joined')
+        queryset = CustomUser.objects.all().order_by('date_joined')
         serializer = UserSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -534,7 +534,7 @@ class PlayerGamesViewSetList(APIView):
     queryset = Profile.objects.none()
 
     def get(self, format=None):
-        queryset = Profile.objects.all()
+        queryset = Profile.objects.all().order_by('id')
         serializer = PlayerGamesSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -563,7 +563,7 @@ class TournamentGamesViewSetDetail(APIView):
 class TournamentGamesViewSetList(APIView):
 
     def get(self, format=None):
-        queryset = TournamentInfo.objects.all()
+        queryset = TournamentInfo.objects.all().order_by('id')
         serializer = TournamentGamesSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -585,7 +585,7 @@ class TournamentPlayerResultViewSetDetail(APIView):
 class TournamentPlayerResultViewSetList(APIView):
 
     def get(self, format=None):
-        queryset = TournamentInfo.objects.all()
+        queryset = TournamentInfo.objects.all().order_by('id')
         serializer = TournamentPlayerResultSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -593,7 +593,7 @@ class TournamentPlayerResultViewSetList(APIView):
 class TournamentPlayerNotificationsViewSetList(APIView):
 
     def get(self, format=None):
-        queryset = TournamentInfo.objects.all()
+        queryset = TournamentInfo.objects.all().order_by('id')
         serializer = TournamentPlayerNotificationsSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -690,7 +690,7 @@ class GenerateTournamentLadder(APIView):
                         elif lista2[n] == "":
                             Game.objects.create(tournament=queryset, player1=lista1[n].player, round_number=1, result='1')
                         else:
-                            Game.objects.create(tournament=queryset, player1=lista1[n].player, player2=lista2[n].player,  round_number=1, result='1')
+                            Game.objects.create(tournament=queryset, player1=lista1[n].player, player2=lista2[n].player,  round_number=1, result='0')
                         s.append([lista1[n], lista2[n]])
                     notifications = self.przetasowanie(notifications)
         return Response()
