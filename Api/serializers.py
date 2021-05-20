@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from sorl_thumbnail_serializer.fields import HyperlinkedSorlImageField
-
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from .models import *
 
 
@@ -150,10 +150,20 @@ class PlayerInTournamentResultSerializer(serializers.ModelSerializer):
 
 class TournamentGamesSerializer(serializers.ModelSerializer):
     game = GameSerializer(many=True, source='tournament')
-
+    
     class Meta:
         model = TournamentInfo
         fields = ('id', 'game')
+
+
+class TokenObtainSerializer(TokenObtainPairSerializer):
+
+    @classmethod
+    def get_token(cls, CustomUser):
+        token = super(TokenObtainSerializer,cls).get_token(CustomUser)
+
+        token['email'] = CustomUser.email
+        return token
 
 
 class TournamentPlayerResultSerializer(serializers.ModelSerializer):
@@ -180,3 +190,4 @@ class TournamentSaveSerializer(serializers.ModelSerializer):
             'id', 'name', 'address', 'date', 'members_limit', 'organiser', 'play_type', 'win_points',
             'lose_points', 'draw_points',
             'bye_points', 'country', 'gallery', 'judge')
+

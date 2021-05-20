@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 import os
 from pathlib import Path
 from key import *
+from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -39,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'Api',
+    'rest_framework.authtoken',
     'sorl.thumbnail',
     'sorl_thumbnail_serializer'
 ]
@@ -58,7 +60,7 @@ ROOT_URLCONF = 'ApkaTurniejowaBackEnd.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
+        'DIRS': [BASE_DIR / 'Api/templates']
         ,
         'APP_DIRS': True,
         'OPTIONS': {
@@ -127,3 +129,20 @@ STATIC_URL = '/static/'
 MEDIA_URL = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, "mediafolder")
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfolder")
+
+AUTH_USER_MODEL = 'Api.CustomUser'
+
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ]
+}
+
+SIMPLE_JWT = {
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+}
+
