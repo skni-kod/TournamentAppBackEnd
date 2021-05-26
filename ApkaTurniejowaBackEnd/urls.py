@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.conf.urls import include, url
+from django.conf.urls import url
 from django.conf.urls.static import static
 from Api.views import *
 from . import settings
@@ -40,7 +40,7 @@ urlpatterns = [
     url(r'^api/tournament_player_result/(?P<pk>\d+)/$', TournamentPlayerResultViewSetDetail.as_view(), name='Tournament_Player_Result'),
     url(r'^api/tournament_player_result/$', TournamentPlayerResultViewSetList.as_view(), name='Tournament_Player_Result'),
     url(r'^api/tournament_player_notifications/$', TournamentPlayerNotificationsViewSetList.as_view(), name='Tournament_Player_Notifications'),
-    url(r'^api/generate/(?P<pk>\d+)/$', GenerateTournamentLadder.as_view(), name='generate'),
-    url('api-auth/', include('rest_framework.urls'))
+    url(r'^api/generate/(?P<pk>\d+)/$', GenerateTournamentLadder.as_view(), name='generate')
+
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

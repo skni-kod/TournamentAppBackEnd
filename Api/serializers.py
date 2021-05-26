@@ -1,4 +1,3 @@
-from django.db.models.query import QuerySet
 from rest_framework import serializers
 from sorl_thumbnail_serializer.fields import HyperlinkedSorlImageField
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer

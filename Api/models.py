@@ -1,12 +1,11 @@
 from datetime import datetime
 
-from django.contrib.auth.models import AbstractUser, BaseUserManager, User
+from django.contrib.auth.models import User,AbstractUser, BaseUserManager
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
-from rest_framework import permissions
 from sorl.thumbnail import ImageField
 from django.utils.translation import ugettext_lazy as _
 
@@ -14,6 +13,7 @@ from django.utils.translation import ugettext_lazy as _
 
 
 class CustomUserManager(BaseUserManager):
+
     def _create_user(self, email, password=None, **extra_fields):
         """Tworzenie i zapisywanie usera z podanym mailem i hasłem"""""
         if not email:
@@ -40,17 +40,14 @@ class CustomUserManager(BaseUserManager):
             raise ValueError('Superuser must have is_superuser=True.')
 
         return self._create_user(email, password, **extra_fields)
-    
-    def __str__(self):
-        return self.email
 
 
 class CustomUser(AbstractUser):
     username = None
     email = models.EmailField(_('email address'), unique=True, primary_key=True)
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
-    permissions = 'Player'
 
     objects = CustomUserManager()
 
