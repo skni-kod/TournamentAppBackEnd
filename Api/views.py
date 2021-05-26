@@ -1,18 +1,23 @@
 import random
+from django.contrib.auth import authenticate, login
+from django.db.models.fields import EmailField
+from django.http.response import HttpResponse
 
 import numpy
 from django.http import Http404
 from rest_framework import status
 from rest_framework.views import APIView
+from rest_framework_simplejwt.serializers import PasswordField
 from Api.serializers import *
 from Api.models import *
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-
+from django.shortcuts import render
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import AllowAny
-
-
+from django.contrib.auth.models import User
+from Api.permissions import *
+from Api.decorators import method_permission_classes
 
 class ProfileViewSetList(APIView):
     queryset = Profile.objects.none()
@@ -22,6 +27,7 @@ class ProfileViewSetList(APIView):
         serializer = ProfileSerializer(queryset, many=True)
         return Response(serializer.data)
 
+    @method_permission_classes((IsNotAuthorised or IsReadOnly,))
     def post(self, request):
         serializer = ProfileSerializer(data=request.data)
         if serializer.is_valid():
@@ -43,6 +49,7 @@ class ProfileViewSetDetail(APIView):
         serializer = ProfileSerializer(queryset)
         return Response(serializer.data)
 
+    @method_permission_classes((IsNotAuthorised,))
     def put(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         serializer = ProfileSerializer(queryset)
@@ -51,11 +58,13 @@ class ProfileViewSetDetail(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @method_permission_classes((IsAdmin,))
     def delete(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         queryset.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @method_permission_classes((IsProfileOwner or IsReadOnly,))
     def patch(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         serializer = ProfileSerializer(queryset, data=request.data, partial=True)
@@ -68,11 +77,13 @@ class ProfileViewSetDetail(APIView):
 class TournamentViewSetList(APIView):
     queryset = TournamentInfo.objects.none()
 
+    @method_permission_classes((IsJudge or IsReadOnly, IsAuthorised,))
     def get(self, format=None):
         queryset = TournamentInfo.objects.all()
         serializer = TournamentSerializer(queryset, many=True)
         return Response(serializer.data)
 
+    @method_permission_classes((IsJudge,))
     def post(self, request):
         serializer = TournamentSaveSerializer(data=request.data)
         if serializer.is_valid():
@@ -83,17 +94,20 @@ class TournamentViewSetList(APIView):
 
 class TournamentViewSetDetail(APIView):
 
+    @method_permission_classes((IsJudge or IsReadOnly, IsAuthorised,))
     def get_object(self, pk):
         try:
             return TournamentInfo.objects.get(pk=pk)
         except TournamentInfo.DoesNotExist:
             raise Http404
 
+    @method_permission_classes((IsJudge or IsReadOnly,))
     def get(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         serializer = TournamentSerializer(queryset)
         return Response(serializer.data)
 
+    @method_permission_classes((IsJudge,))
     def put(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         serializer = TournamentSaveSerializer(queryset)
@@ -102,11 +116,13 @@ class TournamentViewSetDetail(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @method_permission_classes((IsTournamentJudge,))
     def delete(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         queryset.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @method_permission_classes((IsTournamentJudge,))
     def patch(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         serializer = TournamentSaveSerializer(queryset, data=request.data, partial=True)
@@ -118,11 +134,13 @@ class TournamentViewSetDetail(APIView):
 
 class GameViewSetList(APIView):
 
+    @method_permission_classes((IsGameJudge or IsReadOnly, IsAuthorised,))
     def get(self, format=None):
         queryset = Game.objects.all()
         serializer = GameSerializer(queryset, many=True)
         return Response(serializer.data)
 
+    @method_permission_classes((IsGameJudge,))
     def post(self, request):
         serializer = GameSerializer(data=request.data)
         if serializer.is_valid():
@@ -132,17 +150,21 @@ class GameViewSetList(APIView):
 
 
 class GameViewSetDetail(APIView):
+
+    @method_permission_classes((IsGameJudge or IsReadOnly, IsAuthorised,))
     def get_object(self, pk):
         try:
             return Game.objects.get(pk=pk)
         except Game.DoesNotExist:
             raise Http404
 
+    @method_permission_classes((IsGameJudge or IsReadOnly, IsAuthorised,))
     def get(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         serializer = GameSerializer(queryset)
         return Response(serializer.data)
 
+    @method_permission_classes((IsGameJudge,))
     def put(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         serializer = GameSerializer(queryset)
@@ -151,11 +173,13 @@ class GameViewSetDetail(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @method_permission_classes((IsGameJudge,))
     def delete(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         queryset.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @method_permission_classes((IsGameJudge,))
     def patch(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         serializer = GameSerializer(queryset, data=request.data, partial=True)
@@ -167,11 +191,13 @@ class GameViewSetDetail(APIView):
 
 class ClubViewSetList(APIView):
 
+    @method_permission_classes((IsAuthorised, IsReadOnly))
     def get(self, format=None):
         queryset = Club.objects.all()
         serializer = ClubSerializer(queryset, many=True)
         return Response(serializer.data)
 
+    @method_permission_classes((IsAuthorised, IsReadOnly))
     def post(self, request):
         serializer = ClubSerializer(data=request.data)
         if serializer.is_valid():
@@ -182,17 +208,20 @@ class ClubViewSetList(APIView):
 
 class ClubViewSetDetail(APIView):
 
+    @method_permission_classes((IsAuthorised, IsReadOnly))
     def get_object(self, pk):
         try:
             return Club.objects.get(pk=pk)
         except Club.DoesNotExist:
             raise Http404
 
+    @method_permission_classes((IsAuthorised, IsReadOnly))
     def get(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         serializer = ClubSerializer(queryset)
         return Response(serializer.data)
 
+    @method_permission_classes((IsAdmin,))
     def put(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         serializer = ClubSerializer(queryset)
@@ -201,11 +230,13 @@ class ClubViewSetDetail(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @method_permission_classes((IsAdmin,))
     def delete(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         queryset.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @method_permission_classes((IsAdmin,))
     def patch(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         serializer = ClubSerializer(queryset, data=request.data, partial=True)
@@ -217,11 +248,13 @@ class ClubViewSetDetail(APIView):
 
 class GalleryViewSetList(APIView):
 
+    @method_permission_classes((IsJudge or IsReadOnly, IsAuthorised,))
     def get(self, format=None):
         queryset = Gallery.objects.all()
         serializer = GallerySerializer(queryset, many=True)
         return Response(serializer.data)
 
+    @method_permission_classes((IsJudge,))
     def post(self, request):
         serializer = GallerySerializer(data=request.data)
         if serializer.is_valid():
@@ -231,17 +264,21 @@ class GalleryViewSetList(APIView):
 
 
 class GalleryViewSetDetail(APIView):
+
+    @method_permission_classes((IsJudge or IsReadOnly, IsAuthorised,))
     def get_object(self, pk):
         try:
             return Gallery.objects.get(pk=pk)
         except Gallery.DoesNotExist:
             raise Http404
 
+    @method_permission_classes((IsJudge or IsReadOnly, IsAuthorised,))
     def get(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         serializer = GallerySerializer(queryset)
         return Response(serializer.data)
-
+    
+    @method_permission_classes((IsJudge,))
     def put(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         serializer = GallerySerializer(queryset)
@@ -250,11 +287,13 @@ class GalleryViewSetDetail(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @method_permission_classes((IsJudge,))
     def delete(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         queryset.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @method_permission_classes((IsJudge,))
     def patch(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         serializer = GallerySerializer(queryset, data=request.data, partial=True)
@@ -266,11 +305,13 @@ class GalleryViewSetDetail(APIView):
 
 class ImageViewSetList(APIView):
 
+    @method_permission_classes((IsJudge or IsReadOnly, IsAuthorised,))
     def get(self, format=None):
         queryset = Image.objects.all()
         serializer = ImageSerializer(queryset, many=True)
         return Response(serializer.data)
 
+    @method_permission_classes((IsJudge,))
     def post(self, request):
         serializer = ImageSerializer(data=request.data)
         if serializer.is_valid():
@@ -281,17 +322,20 @@ class ImageViewSetList(APIView):
 
 class ImageViewSetDetail(APIView):
 
+    @method_permission_classes((IsJudge or IsReadOnly, IsAuthorised,))
     def get_object(self, pk):
         try:
             return Image.objects.get(pk=pk)
         except Image.DoesNotExist:
             raise Http404
 
+    @method_permission_classes((IsJudge or IsReadOnly, IsAuthorised,))
     def get(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         serializer = ImageSerializer(queryset)
         return Response(serializer.data)
 
+    @method_permission_classes((IsJudge,))
     def put(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         serializer = ImageSerializer(queryset)
@@ -300,11 +344,13 @@ class ImageViewSetDetail(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @method_permission_classes((IsJudge,))
     def delete(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         queryset.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @method_permission_classes((IsJudge,))
     def patch(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         serializer = ImageSerializer(queryset, data=request.data, partial=True)
@@ -313,62 +359,16 @@ class ImageViewSetDetail(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    class ImageViewSetList(APIView):
-
-        def get(self, format=None):
-            queryset = Image.objects.all()
-            serializer = ImageSerializer(queryset, many=True)
-            return Response(serializer.data)
-
-        def post(self, request):
-            serializer = ImageSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    class ImageViewSetDetail(APIView):
-
-        def get_object(self, pk):
-            try:
-                return Image.objects.get(pk=pk)
-            except Image.DoesNotExist:
-                raise Http404
-
-        def get(self, request, pk=None, format=None):
-            queryset = self.get_object(pk)
-            serializer = ImageSerializer(queryset)
-            return Response(serializer.data)
-
-        def put(self, request, pk=None, format=None):
-            queryset = self.get_object(pk)
-            serializer = ImageSerializer(queryset)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        def delete(self, request, pk=None, format=None):
-            queryset = self.get_object(pk)
-            queryset.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-        def patch(self, request, pk=None, format=None):
-            queryset = self.get_object(pk)
-            serializer = ImageSerializer(queryset, data=request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class TournamentNotificationViewSetList(APIView):
 
+    @method_permission_classes((IsAuthorised,))
     def get(self, format=None):
         queryset = TournamentNotification.objects.all()
         serializer = TournamentNotificationSerializer(queryset, many=True)
         return Response(serializer.data)
 
+    @method_permission_classes((IsAuthorised, IsPlayer,))
     def post(self, request):
         serializer = TournamentNotificationSerializer(data=request.data)
         if serializer.is_valid():
@@ -378,6 +378,7 @@ class TournamentNotificationViewSetList(APIView):
 
 
 class TournamentNotificationViewSetDetail(APIView):
+    permission_classes = (IsAuthorised,)
 
     def get_object(self, pk):
         try:
@@ -385,11 +386,13 @@ class TournamentNotificationViewSetDetail(APIView):
         except Image.DoesNotExist:
             raise Http404
 
+    @method_permission_classes((IsPlayer,))
     def get(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         serializer = TournamentNotificationSerializer(queryset)
         return Response(serializer.data)
 
+    @method_permission_classes((IsPlayer,))
     def put(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         serializer = TournamentNotificationSerializer(queryset)
@@ -398,11 +401,13 @@ class TournamentNotificationViewSetDetail(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @method_permission_classes((IsNotificationOwner,))
     def delete(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         queryset.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @method_permission_classes((IsNotificationOwner,))
     def patch(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         serializer = TournamentNotificationSerializer(queryset, data=request.data, partial=True)
@@ -414,11 +419,13 @@ class TournamentNotificationViewSetDetail(APIView):
 
 class PlayerInTournamentResultViewSetList(APIView):
 
+    @method_permission_classes((IsResultJudge or IsReadOnly,))
     def get(self, format=None):
         queryset = PlayerInTournamentResult.objects.all()
         serializer = PlayerInTournamentResultSerializer(queryset, many=True)
         return Response(serializer.data)
 
+    @method_permission_classes((IsResultJudge,))
     def post(self, request):
         serializer = PlayerInTournamentResultSerializer(data=request.data)
         if serializer.is_valid():
@@ -429,17 +436,20 @@ class PlayerInTournamentResultViewSetList(APIView):
 
 class PlayerInTournamentResultViewSetDetail(APIView):
 
+    @method_permission_classes((IsResultJudge or IsReadOnly,))
     def get_object(self, pk):
         try:
             return PlayerInTournamentResult.objects.get(pk=pk)
         except Image.DoesNotExist:
             raise Http404
 
+    @method_permission_classes((IsResultJudge or IsReadOnly,))
     def get(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         serializer = PlayerInTournamentResultSerializer(queryset)
         return Response(serializer.data)
 
+    @method_permission_classes((IsResultJudge,))
     def put(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         serializer = PlayerInTournamentResultSerializer(queryset)
@@ -448,11 +458,13 @@ class PlayerInTournamentResultViewSetDetail(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @method_permission_classes((IsResultJudge,))
     def delete(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         queryset.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @method_permission_classes((IsResultJudge,))
     def patch(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         serializer = PlayerInTournamentResultSerializer(queryset, data=request.data, partial=True)
@@ -465,17 +477,20 @@ class PlayerInTournamentResultViewSetDetail(APIView):
 class UserViewSetDetail(APIView):
     queryset = CustomUser.objects.none()
 
+    @method_permission_classes((IsReadOnly,))
     def get_object(self, pk):
         try:
             return CustomUser.objects.get(pk=pk)
         except User.DoesNotExist:
             raise Http404
 
+    @method_permission_classes((IsReadOnly,))
     def get(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         serializer = UserSerializer(queryset)
         return Response(serializer.data)
 
+    @method_permission_classes((IsNotAuthorised,))
     def put(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         serializer = UserUpdateSerializer(queryset, data=request.data)
@@ -484,11 +499,13 @@ class UserViewSetDetail(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @method_permission_classes((IsAdmin,))
     def delete(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         queryset.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @method_permission_classes((IsReadOnly or IsUserOwner,))
     def patch(self, request,  pk=None, format=None):
         queryset = self.get_object(pk)
         serializer = UserUpdateSerializer(queryset, data=request.data, partial=True)
@@ -506,6 +523,7 @@ class UserViewSetList(APIView):
         serializer = UserSerializer(queryset, many=True)
         return Response(serializer.data)
 
+    @method_permission_classes((IsNotAuthorised or IsReadOnly,))
     def post(self, request, format=None):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
@@ -531,6 +549,7 @@ class TestView(APIView):
 
       
 class PlayerGamesViewSetList(APIView):
+    permission_classes = (IsAuthorised,)
     queryset = Profile.objects.none()
 
     def get(self, format=None):
@@ -547,6 +566,7 @@ class PlayerGamesViewSetList(APIView):
 
 
 class TournamentGamesViewSetDetail(APIView):
+    permission_classes = (IsAuthorised,)
 
     def get_object(self, pk):
         try:
@@ -561,6 +581,7 @@ class TournamentGamesViewSetDetail(APIView):
 
 
 class TournamentGamesViewSetList(APIView):
+    permission_classes = (IsAuthorised,)
 
     def get(self, format=None):
         queryset = TournamentInfo.objects.all()
@@ -569,6 +590,7 @@ class TournamentGamesViewSetList(APIView):
 
 
 class TournamentPlayerResultViewSetDetail(APIView):
+    permission_classes = (IsAuthorised,)
 
     def get_object(self, pk):
         try:
@@ -583,6 +605,7 @@ class TournamentPlayerResultViewSetDetail(APIView):
 
 
 class TournamentPlayerResultViewSetList(APIView):
+    permission_classes = (IsAuthorised,)
 
     def get(self, format=None):
         queryset = TournamentInfo.objects.all()
@@ -591,6 +614,7 @@ class TournamentPlayerResultViewSetList(APIView):
 
 
 class TournamentPlayerNotificationsViewSetList(APIView):
+    permission_classes = (IsAuthorised,)
 
     def get(self, format=None):
         queryset = TournamentInfo.objects.all()
@@ -599,6 +623,7 @@ class TournamentPlayerNotificationsViewSetList(APIView):
 
 
 class GenerateTournamentLadder(APIView):
+    permission_classes = (IsAuthorised, IsJudge)
 
     def get_object(self, pk):
         try:
