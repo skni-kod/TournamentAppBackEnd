@@ -88,8 +88,16 @@ class IsUserOwner(permissions.BasePermission):
 
 
 class IsProfileOwner(permissions.BasePermission):    
-    # 'You have to be Judge of game's tournament'
+    # 'You have to be Profile owner'
     def has_permission(self, request, view):
         return bool( (type(request.user) is not AnonymousUser)   or request.user.is_superuser == True)
     def has_object_permission(self, request, view, obj):
         return (request.user.email == obj.user.email)
+
+
+class IsJudgeOwner(permissions.BasePermission):    
+    # 'You have to be Judge profile owner'
+    def has_permission(self, request, view):
+        return bool( (type(request.user) is not AnonymousUser)   or request.user.is_superuser == True)
+    def has_object_permission(self, request, view, obj):
+        return bool(request.user.email == obj.user.email)

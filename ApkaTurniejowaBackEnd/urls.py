@@ -14,6 +14,8 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^api/profile/$', ProfileViewSetList.as_view(), name='Player_List'),
     url(r'^api/profile/(?P<pk>\d+)/$', ProfileViewSetDetail.as_view(), name='Player_Detail'),
+    url(r'^api/judge/$', JudgeViewSetList.as_view(), name='Judge_List'),
+    url(r'^api/judge/(?P<pk>\d+)/$', JudgeViewSetDetail.as_view(), name='Judge_Detail'),
     url(r'^api/tournament/$', TournamentViewSetList.as_view(), name='Tournament_List'),
     url(r'^api/tournament/(?P<pk>\d+)/$', TournamentViewSetDetail.as_view(), name='Tournament_Detail'),
     url(r'^api/club/$', ClubViewSetList.as_view(), name='Club_List'),

@@ -94,6 +94,13 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = ('id', 'user', 'rating', 'country', 'club')
 
 
+class JudgeSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Judge
+        fields = ('id', 'user', 'judge_category')
+
 class TournamentSerializer(serializers.ModelSerializer):
     gallery = GallerySerializer()
 
