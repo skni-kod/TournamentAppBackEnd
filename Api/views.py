@@ -638,7 +638,7 @@ class JudgeViewSetList(APIView):
     queryset = CustomUser.objects.none()
 
     def get(self, format=None):
-        queryset = Judge.objects.all().order_by('-date_joined')
+        queryset = Judge.objects.all().order_by('id')
         serializer = JudgeSerializer(queryset, many=True)
         return Response(serializer.data)
 
