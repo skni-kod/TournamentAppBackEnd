@@ -165,6 +165,30 @@ class TokenObtainSerializer(TokenObtainPairSerializer):
         token['email'] = CustomUser.email
         return token
 
+class JudgeSerializer(serializers.ModelSerializer):
+    is_admin_user = serializers.SerializerMethodField()
+    class Meta:
+        model = CustomUser
+        fields = ('id', 'email', 'profile', 'password',
+                  'first_name', 'last_name', 'is_admin_user')
+        read_only_fields = ('profile',)
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
+    def get_is_admin_user(self, obj):
+        return obj.is_staff
+
+    def create(self,validated_data):
+        user = CustomUser.objects.create_user(
+            email=validated_data['email'],
+        )
+        user.set_password(validated_data['password'])
+        user.permissions = 'IsJudge'
+        user.save()
+        return user
+
+
+
 
 class TournamentPlayerResultSerializer(serializers.ModelSerializer):
     result = PlayerInTournamentResultSerializer(many=True, source='player_results')

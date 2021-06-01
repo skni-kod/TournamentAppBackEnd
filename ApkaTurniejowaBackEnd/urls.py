@@ -9,7 +9,6 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
-
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^api/profile/$', ProfileViewSetList.as_view(), name='Player_List'),
@@ -30,6 +29,7 @@ urlpatterns = [
     url(r'^api/player_result/(?P<pk>\d+)/$', PlayerInTournamentResultViewSetDetail.as_view(), name='Player_Result_Detail'),
     url(r'^api/user/(?P<pk>\d+)/$', UserViewSetDetail.as_view(), name='User_Detail'),
     url(r'^api/user/list/$', UserViewSetList.as_view(), name='User_List'),
+    url(r'^api/user/judge/list/$', JudgeViewSetList.as_view(), name='Judge_List'),
     url(r'^api/token/$', TokenObtainView.as_view(),name='token_obtain'),
     url(r'^api/token/refresh/$', TokenRefreshView.as_view(),name='token_refresh'),
     url(r'^api/user/test/$',TestView.as_view(),name='test'),
@@ -44,3 +44,4 @@ urlpatterns = [
 
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
