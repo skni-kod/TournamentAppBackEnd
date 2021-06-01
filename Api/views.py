@@ -595,15 +595,6 @@ class TokenObtainView(TokenObtainPairView):
 
     serializer_class = TokenObtainSerializer
 
-class TestView(APIView):
-
-    permission_classes = (IsAuthenticated,)
-
-    def get(self, format=None):
-        queryset = CustomUser.objects.all()
-        serializer = UserSerializer(queryset,many=True)
-        return Response(serializer.data)
-
       
 class PlayerGamesViewSetList(APIView):
     permission_classes = (IsAuthorised,)
