@@ -1,3 +1,4 @@
+from django.db.models.query import QuerySet
 from rest_framework import serializers
 from sorl_thumbnail_serializer.fields import HyperlinkedSorlImageField
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -92,6 +93,13 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = ('id', 'user', 'rating', 'country', 'club')
 
+
+class JudgeSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Judge
+        fields = ('id', 'user', 'judge_category')
 
 class TournamentSerializer(serializers.ModelSerializer):
     gallery = GallerySerializer()
