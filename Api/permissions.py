@@ -32,13 +32,14 @@ class IsAuthorisedAndOwner(permissions.BasePermission):
 class IsPlayer(permissions.BasePermission):    
     # 'You have to be Player'
     def has_permission(self, request, view):
-        return bool( ((type(request.user) is not AnonymousUser)  and request.user.permissions == 'Player') or request.user.is_superuser == True)
+        return bool( ( (type(request.user) is not AnonymousUser)  and request.user.groups.filter(name='Players').exists() ) or request.user.is_superuser == True)
+        
 
 
 class IsJudge(permissions.BasePermission):    
     # 'You have to be Judge'
     def has_permission(self, request, view):
-        return bool( ((type(request.user) is not AnonymousUser)  and request.user.permissions == 'Judge') or request.user.is_superuser == True)
+        return bool( ((type(request.user) is not AnonymousUser)  and request.user.groups.filter(name='Judges').exists() ) or request.user.is_superuser == True)
 
 
 class IsAdmin(permissions.BasePermission):    
@@ -50,7 +51,7 @@ class IsAdmin(permissions.BasePermission):
 class IsTournamentJudge(permissions.BasePermission):    
     # 'You have to be tournament's Judge'
     def has_permission(self, request, view):
-        return bool( ((type(request.user) is not AnonymousUser)  and request.user.permissions == 'Judge') or request.user.is_superuser == True)
+        return bool( ((type(request.user) is not AnonymousUser)  and request.user.groups.filter(name='Judges').exists() ) or request.user.is_superuser == True)
     def has_object_permission(self, request, view, obj):
         return (request.user.email == obj.judge.user.email)
 
@@ -58,7 +59,7 @@ class IsTournamentJudge(permissions.BasePermission):
 class IsGameJudge(permissions.BasePermission):    
     # 'You have to be Judge of game's tournament'
     def has_permission(self, request, view):
-        return bool( ((type(request.user) is not AnonymousUser)  and request.user.permissions == 'Judge') or request.user.is_superuser == True)
+        return bool( ((type(request.user) is not AnonymousUser)  and request.user.groups.filter(name='Judges').exists() ) or request.user.is_superuser == True)
     def has_object_permission(self, request, view, obj):
         return (request.user.email == obj.tournament.judge.user.email)
 
@@ -66,7 +67,7 @@ class IsGameJudge(permissions.BasePermission):
 class IsResultJudge(permissions.BasePermission):    
     # 'You have to be Judge of result's tournament'
     def has_permission(self, request, view):
-        return bool( ((type(request.user) is not AnonymousUser)  and request.user.permissions == 'Judge') or request.user.is_superuser == True)
+        return bool( ((type(request.user) is not AnonymousUser)  and request.user.groups.filter(name='Judges').exists() ) or request.user.is_superuser == True)
     def has_object_permission(self, request, view, obj):
         return (request.user.email == obj.tournament.judge.user.email or request.method in permissions.SAFE_METHODS)             
 
@@ -74,7 +75,7 @@ class IsResultJudge(permissions.BasePermission):
 class IsNotificationOwner(permissions.BasePermission):    
     # 'You have to be Judge of game's tournament'
     def has_permission(self, request, view):
-        return bool( ((type(request.user) is not AnonymousUser)  and request.user.permissions == 'Player') or request.user.is_superuser == True)
+        return bool( ((type(request.user) is not AnonymousUser)  and request.user.groups.filter(name='Players').exists() ) or request.user.is_superuser == True)
     def has_object_permission(self, request, view, obj):
         return (request.user.email == obj.notification.player.user.email)
 
