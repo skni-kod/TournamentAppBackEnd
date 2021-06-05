@@ -22,7 +22,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = CustomUser.objects.create_user(
-            email=validated_data['email'],
+            email=validated_data['email'], group='Players'
         )
         user.set_password(validated_data['password'])
         user.save()
@@ -173,7 +173,7 @@ class TokenObtainSerializer(TokenObtainPairSerializer):
         token['email'] = CustomUser.email
         return token
 
-class JudgeSerializer(serializers.ModelSerializer):
+class JudgeRegisterSerializer(serializers.ModelSerializer):
     is_admin_user = serializers.SerializerMethodField()
     class Meta:
         model = CustomUser
@@ -188,11 +188,12 @@ class JudgeSerializer(serializers.ModelSerializer):
 
     def create(self,validated_data):
         user = CustomUser.objects.create_user(
-            email=validated_data['email'],
+            email=validated_data['email'], group='Judges',
         )
         user.set_password(validated_data['password'])
-        user.permissions = 'IsJudge'
+        user.perm = True
         user.save()
+
         return user
 
 

@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login
 from django.db.models.fields import EmailField
 from django.http.response import HttpResponse
 
-import numpy
+#import numpy
 from django.http import Http404
 from rest_framework import status
 from rest_framework.views import APIView
@@ -85,7 +85,7 @@ class JudgeViewSetList(APIView):
 
     @method_permission_classes((IsNotAuthorised or IsReadOnly,))
     def post(self, request):
-        serializer = JudgeSerializer(data=request.data)
+        serializer = JudgeRegisterSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)

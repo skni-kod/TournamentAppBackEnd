@@ -15,22 +15,22 @@ from django.contrib.auth.models import Group
 
 
 class CustomUserManager(BaseUserManager):
-    def _create_user(self, email, password=None, **extra_fields):
+    def _create_user(self, email,group, password=None, **extra_fields):
         """Tworzenie i zapisywanie usera z podanym mailem i hasłem"""""
         if not email:
             raise ValueError('No email')
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
-        group = Group.objects.get(name='Players')
-        user.groups.add(group)
+        group_add = Group.objects.get(name='Players')
+        user.groups.add(group_add)
         user.save(using=self._db)
         return user
 
-    def create_user(self, email, password=None, **extra_fields):
+    def create_user(self, email,group,password=None, **extra_fields):
         extra_fields.setdefault('is_staff', False)
         extra_fields.setdefault('is_superuser', False)
-        return self._create_user(email, password, **extra_fields)
+        return self._create_user(email, group,password, **extra_fields)
 
     def create_superuser(self, email, password=None, **extra_fields):
         """Tworzenie i zapisywanie superusera z podanym mailem i hasłem"""""
@@ -50,7 +50,7 @@ class CustomUserManager(BaseUserManager):
 
 class CustomUser(AbstractUser):
     username = None
-    email = models.EmailField(_('email address'), unique=True, primary_key=True)
+    email = models.EmailField(_('email address'), unique=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
