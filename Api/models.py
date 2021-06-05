@@ -22,9 +22,10 @@ class CustomUserManager(BaseUserManager):
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
-        group_add = Group.objects.get(name='Players')
-        user.groups.add(group_add)
+
         user.save(using=self._db)
+        group_add = Group.objects.get(name=group)
+        user.groups.add(group_add)
         return user
 
     def create_user(self, email,group,password=None, **extra_fields):
