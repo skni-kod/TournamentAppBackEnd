@@ -15,7 +15,7 @@ from django.contrib.auth.models import Group
 
 
 class CustomUserManager(BaseUserManager):
-    def _create_user(self, email,group, password=None, **extra_fields):
+    def _create_user(self, email, password=None,group=None, **extra_fields):
         """Tworzenie i zapisywanie usera z podanym mailem i hasłem"""""
         if not email:
             raise ValueError('No email')
@@ -24,17 +24,18 @@ class CustomUserManager(BaseUserManager):
         user.set_password(password)
 
         user.save(using=self._db)
+
         if group is not None:
             group_add = Group.objects.get(name=group)
             user.groups.add(group_add)
         return user
 
-    def create_user(self, email,group,password=None, **extra_fields):
+    def create_user(self, email,password=None,group=None, **extra_fields):
         extra_fields.setdefault('is_staff', False)
         extra_fields.setdefault('is_superuser', False)
-        return self._create_user(email, group,password, **extra_fields)
+        return self._create_user(email,password, group, **extra_fields)
 
-    def create_superuser(self, email, password=None, **extra_fields):
+    def create_superuser(self, email,password=None, **extra_fields):
         """Tworzenie i zapisywanie superusera z podanym mailem i hasłem"""""
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
@@ -44,7 +45,7 @@ class CustomUserManager(BaseUserManager):
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
 
-        return self._create_user(email,password, group=None, **extra_fields)
+        return self._create_user(email,password, **extra_fields)
     
     def __str__(self):
         return self.email
