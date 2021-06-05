@@ -9,6 +9,7 @@ from django.utils import timezone
 from rest_framework import permissions
 from sorl.thumbnail import ImageField
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.auth.models import Group
 
 """CUSTOM USER MODEL"""
 
@@ -21,6 +22,8 @@ class CustomUserManager(BaseUserManager):
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
+        group = Group.objects.get(name='Players')
+        user.groups.add(group)
         user.save(using=self._db)
         return user
 
@@ -50,7 +53,6 @@ class CustomUser(AbstractUser):
     email = models.EmailField(_('email address'), unique=True, primary_key=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
-    permissions = 'Player'
 
     objects = CustomUserManager()
 
