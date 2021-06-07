@@ -177,7 +177,7 @@ class JudgeRegisterSerializer(serializers.ModelSerializer):
     is_admin_user = serializers.SerializerMethodField()
     class Meta:
         model = CustomUser
-        fields = ('id', 'email', 'profile', 'password',
+        fields = ( 'id','email', 'profile', 'password',
                   'first_name', 'last_name', 'is_admin_user')
         read_only_fields = ('profile',)
         extra_kwargs = {
@@ -193,7 +193,8 @@ class JudgeRegisterSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.perm = True
         user.save()
-
+        judge = Judge(user=user,judge_category=500)
+        judge.save()
         return user
 
 

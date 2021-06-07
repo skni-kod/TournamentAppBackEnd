@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate, login
 from django.db.models.fields import EmailField
 from django.http.response import HttpResponse
 
-import numpy
+#import numpy
 from django.http import Http404
 from rest_framework import status
 from rest_framework.views import APIView
@@ -774,18 +774,3 @@ class GenerateTournamentLadder(APIView):
         queryset.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-class JudgeViewSetList(APIView):
-    queryset = CustomUser.objects.none()
-
-    def get(self, format=None):
-        queryset = CustomUser.objects.all().order_by('-date_joined')
-        serializer = JudgeSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def post(self, request, format=None):
-        serializer = JudgeSerializer(data=request.data)
-
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
