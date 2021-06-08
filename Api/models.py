@@ -9,27 +9,33 @@ from django.utils import timezone
 from rest_framework import permissions
 from sorl.thumbnail import ImageField
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.auth.models import Group
 
 """CUSTOM USER MODEL"""
 
 
 class CustomUserManager(BaseUserManager):
-    def _create_user(self, email, password=None, **extra_fields):
+    def _create_user(self, email, password=None,group=None, **extra_fields):
         """Tworzenie i zapisywanie usera z podanym mailem i hasłem"""""
         if not email:
             raise ValueError('No email')
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
+
         user.save(using=self._db)
+
+        if group is not None:
+            group_add = Group.objects.get(name=group)
+            user.groups.add(group_add)
         return user
 
-    def create_user(self, email, password=None, **extra_fields):
+    def create_user(self, email,password=None,group=None, **extra_fields):
         extra_fields.setdefault('is_staff', False)
         extra_fields.setdefault('is_superuser', False)
-        return self._create_user(email, password, **extra_fields)
+        return self._create_user(email,password, group, **extra_fields)
 
-    def create_superuser(self, email, password=None, **extra_fields):
+    def create_superuser(self, email,password=None, **extra_fields):
         """Tworzenie i zapisywanie superusera z podanym mailem i hasłem"""""
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
@@ -39,7 +45,7 @@ class CustomUserManager(BaseUserManager):
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
 
-        return self._create_user(email, password, **extra_fields)
+        return self._create_user(email,password, **extra_fields)
     
     def __str__(self):
         return self.email
@@ -47,10 +53,9 @@ class CustomUserManager(BaseUserManager):
 
 class CustomUser(AbstractUser):
     username = None
-    email = models.EmailField(_('email address'), unique=True, primary_key=True)
+    email = models.EmailField(_('email address'), unique=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
-    permissions = 'Player'
 
     objects = CustomUserManager()
 
