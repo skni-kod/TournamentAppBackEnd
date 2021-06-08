@@ -13,6 +13,14 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.permissions import AllowAny
 
 
+def przetasowanie(lista):
+    wynik = [lista[0]]
+    for n in range(len(lista) - 1):
+        if n == 0:
+            wynik.append(lista[-1])
+        else:
+            wynik.append(lista[n])
+    return wynik
 
 class ProfileViewSetList(APIView):
     queryset = Profile.objects.none()
@@ -160,6 +168,7 @@ class GameViewSetDetail(APIView):
         queryset = self.get_object(pk)
         serializer = GameSerializer(queryset, data=request.data, partial=True)
         if serializer.is_valid():
+            data = serializer.validated_data()
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -223,7 +232,7 @@ class GalleryViewSetList(APIView):
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = GallerySerializer(data=request.data)
+        serializer = GallerySaveSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -244,7 +253,7 @@ class GalleryViewSetDetail(APIView):
 
     def put(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        serializer = GallerySerializer(queryset)
+        serializer = GallerySaveSerializer(queryset)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -257,7 +266,7 @@ class GalleryViewSetDetail(APIView):
 
     def patch(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        serializer = GallerySerializer(queryset, data=request.data, partial=True)
+        serializer = GallerySaveSerializer(queryset, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -312,54 +321,6 @@ class ImageViewSetDetail(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    class ImageViewSetList(APIView):
-
-        def get(self, format=None):
-            queryset = Image.objects.all().order_by('id')
-            serializer = ImageSerializer(queryset, many=True)
-            return Response(serializer.data)
-
-        def post(self, request):
-            serializer = ImageSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    class ImageViewSetDetail(APIView):
-
-        def get_object(self, pk):
-            try:
-                return Image.objects.get(pk=pk)
-            except Image.DoesNotExist:
-                raise Http404
-
-        def get(self, request, pk=None, format=None):
-            queryset = self.get_object(pk)
-            serializer = ImageSerializer(queryset)
-            return Response(serializer.data)
-
-        def put(self, request, pk=None, format=None):
-            queryset = self.get_object(pk)
-            serializer = ImageSerializer(queryset)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        def delete(self, request, pk=None, format=None):
-            queryset = self.get_object(pk)
-            queryset.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-
-        def patch(self, request, pk=None, format=None):
-            queryset = self.get_object(pk)
-            serializer = ImageSerializer(queryset, data=request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TournamentNotificationViewSetList(APIView):
@@ -520,15 +481,6 @@ class TokenObtainView(TokenObtainPairView):
 
     serializer_class = TokenObtainSerializer
 
-class TestView(APIView):
-
-    permission_classes = (IsAuthenticated,)
-
-    def get(self, format=None):
-        queryset = CustomUser.objects.all()
-        serializer = UserSerializer(queryset,many=True)
-        return Response(serializer.data)
-
       
 class PlayerGamesViewSetList(APIView):
     queryset = Profile.objects.none()
@@ -680,6 +632,7 @@ class GenerateTournamentLadder(APIView):
         random.shuffle(notifications)
         if not Game.objects.filter(tournament=queryset).exists():
             if queryset.play_type == 'LADDER':
+                next_games = []
                 rounds_number = int(numpy.ceil(numpy.log2(notification_number)))
                 one_player = 2 ** rounds_number - notification_number
                 gamesr1 = int((2 ** rounds_number) / 2)
@@ -691,13 +644,13 @@ class GenerateTournamentLadder(APIView):
                                 if half_gamesr1 > n >= (half_gamesr1 - int(one_player/2)):
                                     player = random.choice(notifications)
                                     Game.objects.create(tournament=queryset, player1=player.player, player2=None, round_number=1, result='1')
+                                    next_games.append(player)
                                     notifications.remove(player)
-                                    print('mniejsze')
                                 elif n >= half_gamesr1 and n >= (gamesr1-int(one_player/2)-1):
                                     player = random.choice(notifications)
                                     Game.objects.create(tournament=queryset, player1=player.player, player2=None, round_number=1, result='1')
+                                    next_games.append(player)
                                     notifications.remove(player)
-                                    print('wieksze')
                                 else:
                                     if len(notifications) > 1:
                                         while True:
@@ -708,8 +661,6 @@ class GenerateTournamentLadder(APIView):
                                         Game.objects.create(tournament=queryset, player1=player1.player, player2=player2.player, round_number=1, result='0')
                                         notifications.remove(player1)
                                         notifications.remove(player2)
-                                        print('podwojne')
-                                print('koniec')
                             else:
                                 if len(notifications) > 0:
                                     while True:
@@ -721,9 +672,42 @@ class GenerateTournamentLadder(APIView):
                                     notifications.remove(player1)
                                     notifications.remove(player2)
                     else:
-                        for n in range(2**(r-1)):
-                            Game.objects.create(tournament=queryset, round_number=r+1, result='0')
-
+                        next_games_number = len(next_games) #4
+                        half_gamesr2 = 2**(rounds_number-r-1)/2
+                        gamesr2 = numpy.ceil(2**(rounds_number-r-1))
+                        for n in range(2**(rounds_number-r-1)):
+                            if r == 1:
+                                if next_games_number > 0:
+                                    print(f'mniejsze {half_gamesr2} > {n} >= {half_gamesr2 - numpy.ceil(next_games_number / 4)}')
+                                    print(f'wieksze {n} >= {half_gamesr2 } and {n} >= {gamesr2 - numpy.ceil(next_games_number/4)}')
+                                    if half_gamesr2 > n >= half_gamesr2 - numpy.ceil(next_games_number/4):
+                                        if (len(next_games)) % 2 == 0:
+                                            player1 = next_games[0]
+                                            player2 = next_games[1]
+                                            Game.objects.create(tournament=queryset, player1=player1.player, player2=player2.player, round_number=2, result='0')
+                                            next_games.pop(0)
+                                            next_games.pop(0)
+                                        else:
+                                            player2 = next_games[0]
+                                            Game.objects.create(tournament=queryset, player2=player2.player, round_number=2, result='0')
+                                            next_games.pop(0)
+                                    elif n >= half_gamesr2 and n >= (gamesr2 - numpy.ceil(next_games_number/4)):
+                                        if (len(next_games)) % 2 == 0:
+                                            player1 = next_games[0]
+                                            player2 = next_games[1]
+                                            Game.objects.create(tournament=queryset, player1=player1.player, player2=player2.player, round_number=2, result='0')
+                                            next_games.pop(0)
+                                            next_games.pop(0)
+                                        else:
+                                            player2 = next_games[0]
+                                            Game.objects.create(tournament=queryset, player2=player2.player, round_number=2, result='0')
+                                            next_games.pop(0)
+                                    else:
+                                        Game.objects.create(tournament=queryset, round_number=r+1, result='0')
+                                else:
+                                    Game.objects.create(tournament=queryset, round_number=r+1, result='0')
+                            else:
+                                Game.objects.create(tournament=queryset, round_number=r + 1, result='0')
             if queryset.play_type == 'RR':
                 s = []
                 if len(notifications) % 2 == 1:
@@ -744,7 +728,7 @@ class GenerateTournamentLadder(APIView):
                         else:
                             Game.objects.create(tournament=queryset, player1=lista1[n].player, player2=lista2[n].player,  round_number=1, result='0')
                         s.append([lista1[n], lista2[n]])
-                    notifications = self.przetasowanie(notifications)
+                    notifications = przetasowanie(notifications)
 
         return Response()
 

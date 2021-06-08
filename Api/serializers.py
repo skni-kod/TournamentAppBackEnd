@@ -206,3 +206,9 @@ class TournamentSaveSerializer(serializers.ModelSerializer):
             'lose_points', 'draw_points',
             'bye_points', 'country', 'gallery', 'judge')
 
+
+class GallerySaveSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Gallery
+        fields = ()

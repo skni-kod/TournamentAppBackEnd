@@ -87,11 +87,11 @@ class Judge(models.Model):
 
 class Gallery(models.Model):
 
-    def __str__(self):
-        return str(self.id)
-
     class Meta:
         verbose_name_plural = "galleries"
+
+    def __str__(self):
+        return str(self.id)
 
 
 class Image(models.Model):
@@ -136,9 +136,9 @@ class PlayerInTournamentResult(models.Model):
 
 
 class Game(models.Model):
-    tournament = models.ForeignKey(TournamentInfo, on_delete=models.CASCADE, related_name='tournament')
-    player1 = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=True, null=True, related_name='player1')
-    player2 = models.ForeignKey(Profile, on_delete=models.CASCADE, blank=True, null=True, related_name='player2')
+    tournament = models.ForeignKey(TournamentInfo, on_delete=models.DO_NOTHING, related_name='tournament')
+    player1 = models.ForeignKey(Profile, on_delete=models.DO_NOTHING, blank=True, null=True, related_name='player1')
+    player2 = models.ForeignKey(Profile, on_delete=models.DO_NOTHING, blank=True, null=True, related_name='player2')
     results = (('0', 'Match not yet played'),
                ('1', f'{player1} Won'),
                ('2', f'{player2} Won'),
