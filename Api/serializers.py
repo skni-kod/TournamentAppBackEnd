@@ -1,3 +1,4 @@
+from django.db.models.query import QuerySet
 from rest_framework import serializers
 from sorl_thumbnail_serializer.fields import HyperlinkedSorlImageField
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -21,7 +22,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = CustomUser.objects.create_user(
-            email=validated_data['email'],
+            email=validated_data['email'], group='Players'
         )
         user.set_password(validated_data['password'])
         user.save()
@@ -31,7 +32,7 @@ class UserSerializer(serializers.ModelSerializer):
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('id', 'email', 'profile', 'first_name', 'last_name')
+        fields = ('email', 'profile', 'first_name', 'last_name')
         read_only_fields = ('profile',)
 
 
@@ -101,13 +102,14 @@ class JudgeSerializer(serializers.ModelSerializer):
         fields = ('id', 'user', 'judge_category')
 
 
+
 class JudgeSaveSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Judge
         fields = ('id', 'user', 'judge_category')
-
-
+        
+        
 class TournamentSerializer(serializers.ModelSerializer):
     gallery = GallerySerializer()
 
@@ -179,6 +181,32 @@ class TokenObtainSerializer(TokenObtainPairSerializer):
 
         token['email'] = CustomUser.email
         return token
+
+class JudgeRegisterSerializer(serializers.ModelSerializer):
+    is_admin_user = serializers.SerializerMethodField()
+    class Meta:
+        model = CustomUser
+        fields = ( 'id','email', 'profile', 'password',
+                  'first_name', 'last_name', 'is_admin_user')
+        read_only_fields = ('profile',)
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
+    def get_is_admin_user(self, obj):
+        return obj.is_staff
+
+    def create(self,validated_data):
+        user = CustomUser.objects.create_user(
+            email=validated_data['email'], group='Judges',
+        )
+        user.set_password(validated_data['password'])
+        user.perm = True
+        user.save()
+        judge = Judge(user=user,judge_category=500)
+        judge.save()
+        return user
+
+
 
 
 class TournamentPlayerResultSerializer(serializers.ModelSerializer):
