@@ -41,8 +41,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'Api',
     'rest_framework.authtoken',
+    'rest_framework_swagger',
     'sorl.thumbnail',
-    'sorl_thumbnail_serializer'
+    'sorl_thumbnail_serializer',
 ]
 
 MIDDLEWARE = [
