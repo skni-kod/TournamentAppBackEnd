@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from django.contrib.auth.models import AbstractUser, BaseUserManager, User
+from django.contrib.auth.models import AbstractUser, BaseUserManager, User, UserManager
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.db.models.signals import post_save
@@ -103,7 +103,7 @@ class Gallery(models.Model):
 
 
 class Image(models.Model):
-    image = ImageField(upload_to='images/')
+    image = models.TextField()
     gallery = models.ForeignKey(Gallery, on_delete=models.CASCADE, related_name='image')
 
     def __str__(self):
@@ -148,11 +148,11 @@ class Game(models.Model):
     player1 = models.ForeignKey(Profile, on_delete=models.DO_NOTHING, blank=True, null=True, related_name='player1')
     player2 = models.ForeignKey(Profile, on_delete=models.DO_NOTHING, blank=True, null=True, related_name='player2')
     results = (('0', 'Match not yet played'),
-               ('1', f'{player1} Won'),
-               ('2', f'{player2} Won'),
+               ('1', 'player1 Won'),
+               ('2', 'player2 Won'),
                ('3', 'Tie'),
-               ('4', f'{player1} Won by bye'),
-               ('5', f'{player2} Won by bye'))
+               ('4', 'player1 Won by bye'),
+               ('5', 'player2 Won by bye'))
     round_number = models.IntegerField()
     result = models.CharField(max_length=20, blank=True, choices=results)
 

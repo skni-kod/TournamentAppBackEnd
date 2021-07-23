@@ -94,13 +94,22 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = ('id', 'user', 'rating', 'country', 'club')
 
 
+class ShortProfileSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(source="user.first_name")
+    last_name = serializers.CharField(source="user.last_name")
+    club = serializers.CharField(source="club.name", allow_null=True)
+
+    class Meta:
+        model = Profile
+        fields = ('id', 'first_name', 'last_name', 'country', 'rating', 'club')
+
+
 class JudgeSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
 
     class Meta:
         model = Judge
         fields = ('id', 'user', 'judge_category')
-
 
 
 class JudgeSaveSerializer(serializers.ModelSerializer):
@@ -138,8 +147,8 @@ class GameSerializer(serializers.ModelSerializer):
 
 
 class TournamentNotificationSerializer(serializers.ModelSerializer):
-    player = ProfileSerializer()
-    tournament = TournamentSerializer()
+    player = ShortProfileSerializer()
+    tournament = ShortTournamentSerializer()
 
     class Meta:
         model = TournamentNotification
@@ -180,7 +189,17 @@ class TokenObtainSerializer(TokenObtainPairSerializer):
         token = super(TokenObtainSerializer,cls).get_token(CustomUser)
 
         token['email'] = CustomUser.email
+
         return token
+
+    def validate(self, attrs):
+        # The default result (access/refresh tokens)
+        data = super(TokenObtainSerializer, self).validate(attrs)
+        # Custom data you want to include
+        data.update({'id': self.user.id})
+        # and everything else you want to send in the response
+        return data
+
 
 class JudgeRegisterSerializer(serializers.ModelSerializer):
     is_admin_user = serializers.SerializerMethodField()
@@ -202,11 +221,9 @@ class JudgeRegisterSerializer(serializers.ModelSerializer):
         user.set_password(validated_data['password'])
         user.perm = True
         user.save()
-        judge = Judge(user=user,judge_category=500)
+        judge = Judge(user=user, judge_category=500)
         judge.save()
         return user
-
-
 
 
 class TournamentPlayerResultSerializer(serializers.ModelSerializer):
@@ -240,3 +257,25 @@ class GallerySaveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Gallery
         fields = ()
+
+
+class ProfileForRegistrationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ('gender', 'country', 'club')
+
+
+class UserProfileSaveSerializer(serializers.ModelSerializer):
+    profile = ProfileForRegistrationSerializer(many=True)
+
+    class Meta:
+        model = CustomUser
+        fields = ('email', 'password', 'first_name', 'last_name', 'profile')
+
+    def create(self, validated_data):
+        profile_data = validated_data.pop('profile')
+        user = CustomUser.objects.create(**validated_data)
+        for pr in profile_data:
+            Profile.objects.create(user=user, **pr, rating=0)
+        return user
+

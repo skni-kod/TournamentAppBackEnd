@@ -555,7 +555,7 @@ class UserViewSetList(APIView):
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        serializer = UserSerializer(data=request.data)
+        serializer = UserProfileSaveSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -567,7 +567,7 @@ class UserViewSetDetail(APIView):
     def get_object(self, pk):
         try:
             return CustomUser.objects.get(pk=pk)
-        except User.DoesNotExist:
+        except CustomUser.DoesNotExist:
             raise Http404
 
     @method_permission_classes((IsAuthorised,))
@@ -692,58 +692,6 @@ class TournamentPlayerNotificationsViewSetList(APIView):
         return Response(serializer.data)
 
 
-class JudgeViewSetDetail(APIView):
-    queryset = Judge.objects.none()
-
-    def get_object(self, pk):
-        try:
-            return Judge.objects.get(pk=pk)
-        except User.DoesNotExist:
-            raise Http404
-
-    def get(self, request, pk=None, format=None):
-        queryset = self.get_object(pk)
-        serializer = JudgeSerializer(queryset)
-        return Response(serializer.data)
-
-    def put(self, request, pk=None, format=None):
-        queryset = self.get_object(pk)
-        serializer = JudgeSaveSerializer(queryset, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, pk=None, format=None):
-        queryset = self.get_object(pk)
-        queryset.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def patch(self, request,  pk=None, format=None):
-        queryset = self.get_object(pk)
-        serializer = JudgeSaveSerializer(queryset, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class JudgeViewSetList(APIView):
-    queryset = CustomUser.objects.none()
-
-    def get(self, format=None):
-        queryset = Judge.objects.all().order_by('id')
-        serializer = JudgeSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def post(self, request, format=None):
-        serializer = JudgeSaveSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 class GenerateTournamentLadder(APIView):
     permission_classes = (IsAuthorised, IsJudge)
 
@@ -815,7 +763,7 @@ class GenerateTournamentLadder(APIView):
                                     notifications.remove(player1)
                                     notifications.remove(player2)
                     else:
-                        next_games_number = len(next_games) #4
+                        next_games_number = len(next_games)  #4
                         half_gamesr2 = 2**(rounds_number-r-1)/2
                         gamesr2 = numpy.ceil(2**(rounds_number-r-1))
                         for n in range(2**(rounds_number-r-1)):

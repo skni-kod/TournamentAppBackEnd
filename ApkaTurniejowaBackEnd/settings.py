@@ -134,7 +134,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfolder")
 AUTH_USER_MODEL = 'Api.CustomUser'
 
 
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.BasicAuthentication',
