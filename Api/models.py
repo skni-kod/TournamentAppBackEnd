@@ -166,3 +166,43 @@ class TournamentNotification(models.Model):
 
     def __str__(self):
         return f'{self.player} {self.tournament}'
+
+
+class Round(models.Model):
+    tournament = models.ForeignKey(TournamentInfo, on_delete=models.CASCADE, related_name='Tournament')
+    round_number = models.PositiveIntegerField()
+
+
+class RRGame(models.Model):
+    round = models.ForeignKey(Round, on_delete=models.CASCADE, related_name='RRGame')
+    player1 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='player1')
+    player2 = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='player2')
+    results = (('0', 'Match not yet played'),
+               ('1', 'player1 Won'),
+               ('2', 'player2 Won'),
+               ('3', 'Tie'),
+               ('4', 'player1 Won by bye'),
+               ('5', 'player2 Won by bye'))
+    result = models.CharField(max_length=20, blank=True, choices=results)
+
+
+class BracketGame(models.Model):
+    round = models.ForeignKey(Round, on_delete=models.CASCADE, related_name='BracketGame')
+    prev_game_l = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
+    prev_game_r = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
+    next_game = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
+    player1 = models.ForeignKey(Profile, on_delete=models.CASCADE, null=True, related_name='player1')
+    player2 = models.ForeignKey(Profile, on_delete=models.CASCADE, null=True, related_name='player2')
+    results = (('0', 'Match not yet played'),
+               ('1', 'player1 Won'),
+               ('2', 'player2 Won'),
+               ('3', 'Tie'),
+               ('4', 'player1 Won by bye'),
+               ('5', 'player2 Won by bye'))
+    result = models.CharField(max_length=20, blank=True, choices=results)
+
+
+class PlayerRoundResult(models.Model):
+    round = models.ForeignKey(Round, on_delete=models.CASCADE, related_name='Result')
+    player = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='Result')
+
