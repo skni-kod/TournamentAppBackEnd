@@ -8,6 +8,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 from rest_framework import permissions
 from sorl.thumbnail import ImageField
+from random import shuffle
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import Group
 
@@ -15,7 +16,7 @@ from django.contrib.auth.models import Group
 
 
 class CustomUserManager(BaseUserManager):
-    def _create_user(self, email, password=None,group=None, **extra_fields):
+    def _create_user(self, email, password=None, group=None, **extra_fields):
         """Tworzenie i zapisywanie usera z podanym mailem i hasłem"""""
         if not email:
             raise ValueError('No email')
@@ -30,12 +31,12 @@ class CustomUserManager(BaseUserManager):
             user.groups.add(group_add)
         return user
 
-    def create_user(self, email,password=None,group=None, **extra_fields):
+    def create_user(self, email, password=None, group=None, **extra_fields):
         extra_fields.setdefault('is_staff', False)
         extra_fields.setdefault('is_superuser', False)
-        return self._create_user(email,password, group, **extra_fields)
+        return self._create_user(email, password, group, **extra_fields)
 
-    def create_superuser(self, email,password=None, **extra_fields):
+    def create_superuser(self, email, password=None, **extra_fields):
         """Tworzenie i zapisywanie superusera z podanym mailem i hasłem"""""
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
@@ -45,8 +46,8 @@ class CustomUserManager(BaseUserManager):
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
 
-        return self._create_user(email,password, **extra_fields)
-    
+        return self._create_user(email, password, **extra_fields)
+
     def __str__(self):
         return self.email
 
@@ -94,7 +95,6 @@ class Judge(models.Model):
 
 
 class Gallery(models.Model):
-
     class Meta:
         verbose_name_plural = "galleries"
 
@@ -132,6 +132,30 @@ class TournamentInfo(models.Model):
 
     def __str__(self):
         return self.name
+
+    def check_slots(self):
+        maximum = self.members_limit
+        taken = TournamentNotification.objects.count(tournament=self)
+        return maximum == taken
+
+    def generate_rounds(self):
+        players = list(TournamentNotification.objects.all().filter(tournament=self))
+        shuffle(players)
+        if not Round.objects.filter(tournament=self).exists():
+            if self.play_type == 'LADDER':
+                i = 0
+                while i < len(players):
+                    round, created = Round.objects.get_or_create(
+                        tournament=self,
+                        number=1
+                    )
+                    game = BracketGame(
+                        player1=players.pop(),
+                        player2=players.pop(),
+                        round=round,
+                        result="0"
+                    )
+                    game.save()
 
 
 class PlayerInTournamentResult(models.Model):
