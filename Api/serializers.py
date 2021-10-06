@@ -140,10 +140,16 @@ class GameSerializer(serializers.ModelSerializer):
     tournament = ShortTournamentSerializer()
     player1 = ProfileForGameSerializer()
     player2 = ProfileForGameSerializer()
+    round_number = serializers.SerializerMethodField()
 
     class Meta:
         model = Game
-        fields = ('id', 'tournament', 'player1', 'player2', 'round_number', 'result')
+        fields = ('id', 'tournament', 'player1', 'player2', 'result', 'round_number')
+
+    def get_round_number(self, obj):
+        return obj.round_number.round_number
+
+
 
 
 class TournamentNotificationSerializer(serializers.ModelSerializer):
@@ -174,12 +180,12 @@ class PlayerInTournamentResultSerializer(serializers.ModelSerializer):
         fields = ('id', 'points_status', 'tournament', 'player_games')
 
 
-class TournamentGamesSerializer(serializers.ModelSerializer):
-    game = GameSerializer(many=True, source='tournament')
-    
+class RoundSerializer(serializers.ModelSerializer):
+    game = GameSerializer(many=True)
+
     class Meta:
-        model = TournamentInfo
-        fields = ('id', 'game')
+        model = Round
+        fields = ('id', 'round_number', 'game')
 
 
 class TokenObtainSerializer(TokenObtainPairSerializer):
@@ -203,6 +209,7 @@ class TokenObtainSerializer(TokenObtainPairSerializer):
 
 class JudgeRegisterSerializer(serializers.ModelSerializer):
     is_admin_user = serializers.SerializerMethodField()
+
     class Meta:
         model = CustomUser
         fields = ( 'id','email', 'profile', 'password',
@@ -278,4 +285,5 @@ class UserProfileSaveSerializer(serializers.ModelSerializer):
         for pr in profile_data:
             Profile.objects.create(user=user, **pr, rating=0)
         return user
+
 

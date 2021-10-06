@@ -143,8 +143,16 @@ class PlayerInTournamentResult(models.Model):
         return f'{self.player} w {self.tournament}'
 
 
+class Round(models.Model):
+    round_number = models.IntegerField()
+    tournament = models.ForeignKey(TournamentInfo, on_delete=models.CASCADE, related_name='tournament')
+
+    def __str__(self):
+        return str(self.round_number)
+
+
 class Game(models.Model):
-    tournament = models.ForeignKey(TournamentInfo, on_delete=models.DO_NOTHING, related_name='tournament')
+    tournament = models.ForeignKey(TournamentInfo, on_delete=models.DO_NOTHING, related_name='game')
     player1 = models.ForeignKey(Profile, on_delete=models.DO_NOTHING, blank=True, null=True, related_name='player1')
     player2 = models.ForeignKey(Profile, on_delete=models.DO_NOTHING, blank=True, null=True, related_name='player2')
     results = (('0', 'Match not yet played'),
@@ -153,7 +161,7 @@ class Game(models.Model):
                ('3', 'Tie'),
                ('4', 'player1 Won by bye'),
                ('5', 'player2 Won by bye'))
-    round_number = models.IntegerField()
+    round_number = models.ForeignKey(Round, on_delete=models.CASCADE, related_name='game')
     result = models.CharField(max_length=20, blank=True, choices=results)
 
     def __str__(self):
@@ -166,3 +174,4 @@ class TournamentNotification(models.Model):
 
     def __str__(self):
         return f'{self.player} {self.tournament}'
+

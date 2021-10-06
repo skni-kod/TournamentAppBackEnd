@@ -546,6 +546,7 @@ class PlayerInTournamentResultViewSetDetail(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class UserViewSetList(APIView):
     queryset = CustomUser.objects.none()
 
@@ -560,6 +561,7 @@ class UserViewSetList(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class UserViewSetDetail(APIView):
     queryset = CustomUser.objects.none()
@@ -635,27 +637,28 @@ class PlayerGamesViewSetList(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class TournamentGamesViewSetDetail(APIView):
+class RoundViewSetDetail(APIView):
     permission_classes = (IsAuthorised,)
 
     def get_object(self, pk):
         try:
-            return TournamentInfo.objects.get(pk=pk)
-        except TournamentInfo.DoesNotExist:
+            tournament = TournamentInfo.objects.filter(pk=pk)[0]
+            return Round.objects.all().filter(tournament=tournament)
+        except Round.DoesNotExist:
             raise Http404
 
     def get(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        serializer = TournamentGamesSerializer(queryset)
+        serializer = RoundSerializer(queryset, many=True)
         return Response(serializer.data)
 
 
-class TournamentGamesViewSetList(APIView):
+class RoundViewSetList(APIView):
     permission_classes = (IsAuthorised,)
 
     def get(self, format=None):
-        queryset = TournamentInfo.objects.all().order_by('id')
-        serializer = TournamentGamesSerializer(queryset, many=True)
+        queryset = Round.objects.all().order_by('id')
+        serializer = RoundSerializer(queryset, many=True)
         return Response(serializer.data)
 
 
@@ -730,16 +733,18 @@ class GenerateTournamentLadder(APIView):
                 half_gamesr1 = gamesr1 / 2
                 for r in range(rounds_number):
                     if r == 0:
+                        curr_round = Round.objects.get_or_create(tournament=queryset, round_number=1)
                         for n in range(gamesr1):
                             if one_player > 0:
+                                curr_round = Round.objects.get_or_create(tournament=queryset, round_number=1)
                                 if half_gamesr1 > n >= (half_gamesr1 - int(one_player/2)):
                                     player = random.choice(notifications)
-                                    Game.objects.create(tournament=queryset, player1=player.player, player2=None, round_number=1, result='1')
+                                    Game.objects.create(tournament=queryset, player1=player.player, player2=None, round_number=curr_round, result='1')
                                     next_games.append(player)
                                     notifications.remove(player)
                                 elif n >= half_gamesr1 and n >= (gamesr1-int(one_player/2)-1):
                                     player = random.choice(notifications)
-                                    Game.objects.create(tournament=queryset, player1=player.player, player2=None, round_number=1, result='1')
+                                    Game.objects.create(tournament=queryset, player1=player.player, player2=None, round_number=curr_round, result='1')
                                     next_games.append(player)
                                     notifications.remove(player)
                                 else:
@@ -749,7 +754,7 @@ class GenerateTournamentLadder(APIView):
                                             player2 = random.choice(notifications)
                                             if player1 != player2:
                                                 break
-                                        Game.objects.create(tournament=queryset, player1=player1.player, player2=player2.player, round_number=1, result='0')
+                                        Game.objects.create(tournament=queryset, player1=player1.player, player2=player2.player, round_number=curr_round, result='0')
                                         notifications.remove(player1)
                                         notifications.remove(player2)
                             else:
@@ -759,7 +764,7 @@ class GenerateTournamentLadder(APIView):
                                         player2 = random.choice(notifications)
                                         if player1 != player2:
                                             break
-                                    Game.objects.create(tournament=queryset, player1=player1.player, player2=player2.player, round_number=1, result='0')
+                                    Game.objects.create(tournament=queryset, player1=player1.player, player2=player2.player, round_number=curr_round, result='0')
                                     notifications.remove(player1)
                                     notifications.remove(player2)
                     else:
@@ -768,6 +773,7 @@ class GenerateTournamentLadder(APIView):
                         gamesr2 = numpy.ceil(2**(rounds_number-r-1))
                         for n in range(2**(rounds_number-r-1)):
                             if r == 1:
+                                curr_round = Round.objects.get_or_create(tournament=queryset, round_number=2)
                                 if next_games_number > 0:
                                     print(f'mniejsze {half_gamesr2} > {n} >= {half_gamesr2 - numpy.ceil(next_games_number / 4)}')
                                     print(f'wieksze {n} >= {half_gamesr2 } and {n} >= {gamesr2 - numpy.ceil(next_games_number/4)}')
@@ -775,30 +781,33 @@ class GenerateTournamentLadder(APIView):
                                         if (len(next_games)) % 2 == 0:
                                             player1 = next_games[0]
                                             player2 = next_games[1]
-                                            Game.objects.create(tournament=queryset, player1=player1.player, player2=player2.player, round_number=2, result='0')
+                                            Game.objects.create(tournament=queryset, player1=player1.player, player2=player2.player, round_number=curr_round, result='0')
                                             next_games.pop(0)
                                             next_games.pop(0)
                                         else:
                                             player2 = next_games[0]
-                                            Game.objects.create(tournament=queryset, player2=player2.player, round_number=2, result='0')
+                                            Game.objects.create(tournament=queryset, player2=player2.player, round_number=curr_round, result='0')
                                             next_games.pop(0)
                                     elif n >= half_gamesr2 and n >= (gamesr2 - numpy.ceil(next_games_number/4)):
                                         if (len(next_games)) % 2 == 0:
                                             player1 = next_games[0]
                                             player2 = next_games[1]
-                                            Game.objects.create(tournament=queryset, player1=player1.player, player2=player2.player, round_number=2, result='0')
+                                            Game.objects.create(tournament=queryset, player1=player1.player, player2=player2.player, round_number=curr_round, result='0')
                                             next_games.pop(0)
                                             next_games.pop(0)
                                         else:
                                             player2 = next_games[0]
-                                            Game.objects.create(tournament=queryset, player2=player2.player, round_number=2, result='0')
+                                            Game.objects.create(tournament=queryset, player2=player2.player, round_number=curr_round, result='0')
                                             next_games.pop(0)
                                     else:
-                                        Game.objects.create(tournament=queryset, round_number=r+1, result='0')
+                                        curr_round = Round.objects.get_or_create(tournament=queryset, round_number=r+1)
+                                        Game.objects.create(tournament=queryset, round_number=curr_round, result='0')
                                 else:
-                                    Game.objects.create(tournament=queryset, round_number=r+1, result='0')
+                                    curr_round = Round.objects.get_or_create(tournament=queryset, round_number=r+1)
+                                    Game.objects.create(tournament=queryset, round_number=curr_round, result='0')
                             else:
-                                Game.objects.create(tournament=queryset, round_number=r + 1, result='0')
+                                curr_round = Round.objects.get_or_create(tournament=queryset, round_number=r+1)
+                                Game.objects.create(tournament=queryset, round_number=curr_round, result='0')
             if queryset.play_type == 'RR':
                 s = []
                 if len(notifications) % 2 == 1:
@@ -811,13 +820,15 @@ class GenerateTournamentLadder(APIView):
                     lista1 = notifications[:mid]
                     lista2 = notifications[mid:]
                     lista2.reverse()
+                    curr_round, created = Round.objects.get_or_create(tournament=queryset, round_number=i+1)
+                    print(curr_round)
                     for n in range(mid):
                         if lista1[n] == "":
-                            Game.objects.create(tournament=queryset, player1=lista2[n].player, round_number=1, result='1')
+                            Game.objects.create(tournament=queryset, player1=lista2[n].player, round_number=curr_round, result='1')
                         elif lista2[n] == "":
-                            Game.objects.create(tournament=queryset, player1=lista1[n].player, round_number=1, result='1')
+                            Game.objects.create(tournament=queryset, player1=lista1[n].player, round_number=curr_round, result='1')
                         else:
-                            Game.objects.create(tournament=queryset, player1=lista1[n].player, player2=lista2[n].player,  round_number=1, result='0')
+                            Game.objects.create(tournament=queryset, player1=lista1[n].player, player2=lista2[n].player, round_number=curr_round, result='0')
                         s.append([lista1[n], lista2[n]])
                     notifications = przetasowanie(notifications)
 
