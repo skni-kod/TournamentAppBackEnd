@@ -44,9 +44,12 @@ INSTALLED_APPS = [
     'rest_framework_swagger',
     'sorl.thumbnail',
     'sorl_thumbnail_serializer',
+    'django_countries',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -57,7 +60,7 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'ApkaTurniejowaBackEnd.urls'
-
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5442880
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

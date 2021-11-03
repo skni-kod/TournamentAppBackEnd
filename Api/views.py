@@ -14,6 +14,7 @@ from Api.permissions import *
 from Api.decorators import method_permission_classes
 from django.core.exceptions import PermissionDenied
 
+
 def przetasowanie(lista):
     wynik = [lista[0]]
     for n in range(len(lista) - 1):
@@ -23,7 +24,7 @@ def przetasowanie(lista):
             wynik.append(lista[n])
     return wynik
 
-  
+
 class ProfileViewSetList(APIView):
     queryset = Profile.objects.none()
 
@@ -64,14 +65,14 @@ class ProfileViewSetDetail(APIView):
 
     def delete(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        if(request.user.email != queryset.user.email and request.user.is_superuser == False):
+        if (request.user.email != queryset.user.email and request.user.is_superuser == False):
             raise PermissionDenied()
         queryset.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def patch(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        if(request.user.email != queryset.user.email and request.user.is_superuser == False):
+        if (request.user.email != queryset.user.email and request.user.is_superuser == False):
             raise PermissionDenied()
         serializer = ProfileSerializer(queryset, data=request.data, partial=True)
         if serializer.is_valid():
@@ -121,14 +122,14 @@ class JudgeViewSetDetail(APIView):
 
     def delete(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        if(request.user.email != queryset.user.email and request.user.is_superuser == False):
+        if (request.user.email != queryset.user.email and request.user.is_superuser == False):
             raise PermissionDenied()
         queryset.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def patch(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        if(request.user.email != queryset.user.email and request.user.is_superuser == False):
+        if (request.user.email != queryset.user.email and request.user.is_superuser == False):
             raise PermissionDenied()
         serializer = JudgeSerializer(queryset, data=request.data, partial=True)
         if serializer.is_valid():
@@ -181,14 +182,14 @@ class TournamentViewSetDetail(APIView):
 
     def delete(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        if(request.user.email != query.judge.user.email and request.user.is_superuser == False):
+        if (request.user.email != query.judge.user.email and request.user.is_superuser == False):
             raise PermissionDenied()
         queryset.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def patch(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        if(request.user.email != queryset.judge.user.email and request.user.is_superuser == False):
+        if (request.user.email != queryset.judge.user.email and request.user.is_superuser == False):
             raise PermissionDenied()
         serializer = TournamentSaveSerializer(queryset, data=request.data, partial=True)
         if serializer.is_valid():
@@ -240,14 +241,14 @@ class GameViewSetDetail(APIView):
 
     def delete(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        if(request.user.email != queryset.tournament.judge.user.email and request.user.is_superuser == False):
+        if (request.user.email != queryset.tournament.judge.user.email and request.user.is_superuser == False):
             raise PermissionDenied()
         queryset.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def patch(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        if(request.user.email != queryset.tournament.judge.user.email and request.user.is_superuser == False):
+        if (request.user.email != queryset.tournament.judge.user.email and request.user.is_superuser == False):
             raise PermissionDenied()
         serializer = GameSerializer(queryset, data=request.data, partial=True)
         if serializer.is_valid():
@@ -456,14 +457,16 @@ class TournamentNotificationViewSetDetail(APIView):
 
     def get(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        if(request.user.email != queryset.player.user.email and request.user.email != queryset.tournament.judge.user.email and request.user.is_superuser == False):
+        if (
+                request.user.email != queryset.player.user.email and request.user.email != queryset.tournament.judge.user.email and request.user.is_superuser == False):
             raise PermissionDenied()
         serializer = TournamentNotificationSerializer(queryset)
         return Response(serializer.data)
 
     def put(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        if(request.user.email != queryset.player.user.email and request.user.email != queryset.tournament.judge.user.email and request.user.is_superuser == False):
+        if (
+                request.user.email != queryset.player.user.email and request.user.email != queryset.tournament.judge.user.email and request.user.is_superuser == False):
             raise PermissionDenied()
         serializer = TournamentNotificationSerializer(queryset)
         if serializer.is_valid():
@@ -473,20 +476,21 @@ class TournamentNotificationViewSetDetail(APIView):
 
     def delete(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        if(request.user.email != queryset.player.user.email and request.user.email != queryset.tournament.judge.user.email and request.user.is_superuser == False):
+        if request.user.email != queryset.player.user.email and request.user.email != queryset.tournament.judge.user.email and request.user.is_superuser == False:
             raise PermissionDenied()
         queryset.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def patch(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        if(request.user.email != queryset.tournament.judge.user.email and request.user.is_superuser == False):
+        if (request.user.email != queryset.tournament.judge.user.email and request.user.is_superuser == False):
             raise PermissionDenied()
         serializer = TournamentNotificationSerializer(queryset, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class PlayerInTournamentResultViewSetList(APIView):
 
@@ -503,6 +507,7 @@ class PlayerInTournamentResultViewSetList(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class PlayerInTournamentResultViewSetDetail(APIView):
 
@@ -521,7 +526,7 @@ class PlayerInTournamentResultViewSetDetail(APIView):
 
     def put(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        if(request.user.email != queryset.tournament.judge.user.email and request.user.is_superuser == False):
+        if (request.user.email != queryset.tournament.judge.user.email and request.user.is_superuser == False):
             raise PermissionDenied()
         serializer = PlayerInTournamentResultSerializer(queryset)
         if serializer.is_valid():
@@ -531,14 +536,14 @@ class PlayerInTournamentResultViewSetDetail(APIView):
 
     def delete(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        if(request.user.email != queryset.tournament.judge.user.email and request.user.is_superuser == False):
+        if (request.user.email != queryset.tournament.judge.user.email and request.user.is_superuser == False):
             raise PermissionDenied()
         queryset.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def patch(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        if(request.user.email != queryset.tournament.judge.user.email and request.user.is_superuser == False):
+        if (request.user.email != queryset.tournament.judge.user.email and request.user.is_superuser == False):
             raise PermissionDenied()
         serializer = PlayerInTournamentResultSerializer(queryset, data=request.data, partial=True)
         if serializer.is_valid():
@@ -589,14 +594,14 @@ class UserViewSetDetail(APIView):
 
     def delete(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        if(request.user.email != queryset.email and request.user.is_superuser == False):
+        if (request.user.email != queryset.email and request.user.is_superuser == False):
             raise PermissionDenied()
         queryset.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def patch(self, request,  pk=None, format=None):
+    def patch(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        if(request.user.email != queryset.email and request.user.is_superuser == False):
+        if (request.user.email != queryset.email and request.user.is_superuser == False):
             raise PermissionDenied()
         serializer = UserUpdateSerializer(queryset, data=request.data, partial=True)
         if serializer.is_valid():
@@ -614,12 +619,11 @@ class UserViewSetDetail(APIView):
 
 
 class TokenObtainView(TokenObtainPairView):
-
     permission_classes = (AllowAny,)
 
     serializer_class = TokenObtainSerializer
 
-      
+
 class PlayerGamesViewSetList(APIView):
     permission_classes = (IsAuthorised,)
     queryset = Profile.objects.none()
@@ -696,7 +700,7 @@ class TournamentPlayerNotificationsViewSetList(APIView):
 
 
 class GenerateTournamentLadder(APIView):
-    permission_classes = (IsAuthorised, IsJudge)
+    permission_classes = (IsJudge)
 
     def get_object(self, pk):
         try:
@@ -737,14 +741,16 @@ class GenerateTournamentLadder(APIView):
                         for n in range(gamesr1):
                             if one_player > 0:
                                 curr_round = Round.objects.get_or_create(tournament=queryset, round_number=1)
-                                if half_gamesr1 > n >= (half_gamesr1 - int(one_player/2)):
+                                if half_gamesr1 > n >= (half_gamesr1 - int(one_player / 2)):
                                     player = random.choice(notifications)
-                                    Game.objects.create(tournament=queryset, player1=player.player, player2=None, round_number=curr_round, result='1')
+                                    Game.objects.create(tournament=queryset, player1=player.player, player2=None,
+                                                        round_number=curr_round, result='1')
                                     next_games.append(player)
                                     notifications.remove(player)
-                                elif n >= half_gamesr1 and n >= (gamesr1-int(one_player/2)-1):
+                                elif n >= half_gamesr1 and n >= (gamesr1 - int(one_player / 2) - 1):
                                     player = random.choice(notifications)
-                                    Game.objects.create(tournament=queryset, player1=player.player, player2=None, round_number=curr_round, result='1')
+                                    Game.objects.create(tournament=queryset, player1=player.player, player2=None,
+                                                        round_number=curr_round, result='1')
                                     next_games.append(player)
                                     notifications.remove(player)
                                 else:
@@ -754,7 +760,8 @@ class GenerateTournamentLadder(APIView):
                                             player2 = random.choice(notifications)
                                             if player1 != player2:
                                                 break
-                                        Game.objects.create(tournament=queryset, player1=player1.player, player2=player2.player, round_number=curr_round, result='0')
+                                        Game.objects.create(tournament=queryset, player1=player1.player,
+                                                            player2=player2.player, round_number=curr_round, result='0')
                                         notifications.remove(player1)
                                         notifications.remove(player2)
                             else:
@@ -764,49 +771,59 @@ class GenerateTournamentLadder(APIView):
                                         player2 = random.choice(notifications)
                                         if player1 != player2:
                                             break
-                                    Game.objects.create(tournament=queryset, player1=player1.player, player2=player2.player, round_number=curr_round, result='0')
+                                    Game.objects.create(tournament=queryset, player1=player1.player,
+                                                        player2=player2.player, round_number=curr_round, result='0')
                                     notifications.remove(player1)
                                     notifications.remove(player2)
                     else:
-                        next_games_number = len(next_games)  #4
-                        half_gamesr2 = 2**(rounds_number-r-1)/2
-                        gamesr2 = numpy.ceil(2**(rounds_number-r-1))
-                        for n in range(2**(rounds_number-r-1)):
+                        next_games_number = len(next_games)  # 4
+                        half_gamesr2 = 2 ** (rounds_number - r - 1) / 2
+                        gamesr2 = numpy.ceil(2 ** (rounds_number - r - 1))
+                        for n in range(2 ** (rounds_number - r - 1)):
                             if r == 1:
                                 curr_round = Round.objects.get_or_create(tournament=queryset, round_number=2)
                                 if next_games_number > 0:
-                                    print(f'mniejsze {half_gamesr2} > {n} >= {half_gamesr2 - numpy.ceil(next_games_number / 4)}')
-                                    print(f'wieksze {n} >= {half_gamesr2 } and {n} >= {gamesr2 - numpy.ceil(next_games_number/4)}')
-                                    if half_gamesr2 > n >= half_gamesr2 - numpy.ceil(next_games_number/4):
+                                    print(
+                                        f'mniejsze {half_gamesr2} > {n} >= {half_gamesr2 - numpy.ceil(next_games_number / 4)}')
+                                    print(
+                                        f'wieksze {n} >= {half_gamesr2} and {n} >= {gamesr2 - numpy.ceil(next_games_number / 4)}')
+                                    if half_gamesr2 > n >= half_gamesr2 - numpy.ceil(next_games_number / 4):
                                         if (len(next_games)) % 2 == 0:
                                             player1 = next_games[0]
                                             player2 = next_games[1]
-                                            Game.objects.create(tournament=queryset, player1=player1.player, player2=player2.player, round_number=curr_round, result='0')
+                                            Game.objects.create(tournament=queryset, player1=player1.player,
+                                                                player2=player2.player, round_number=curr_round,
+                                                                result='0')
                                             next_games.pop(0)
                                             next_games.pop(0)
                                         else:
                                             player2 = next_games[0]
-                                            Game.objects.create(tournament=queryset, player2=player2.player, round_number=curr_round, result='0')
+                                            Game.objects.create(tournament=queryset, player2=player2.player,
+                                                                round_number=curr_round, result='0')
                                             next_games.pop(0)
-                                    elif n >= half_gamesr2 and n >= (gamesr2 - numpy.ceil(next_games_number/4)):
+                                    elif n >= half_gamesr2 and n >= (gamesr2 - numpy.ceil(next_games_number / 4)):
                                         if (len(next_games)) % 2 == 0:
                                             player1 = next_games[0]
                                             player2 = next_games[1]
-                                            Game.objects.create(tournament=queryset, player1=player1.player, player2=player2.player, round_number=curr_round, result='0')
+                                            Game.objects.create(tournament=queryset, player1=player1.player,
+                                                                player2=player2.player, round_number=curr_round,
+                                                                result='0')
                                             next_games.pop(0)
                                             next_games.pop(0)
                                         else:
                                             player2 = next_games[0]
-                                            Game.objects.create(tournament=queryset, player2=player2.player, round_number=curr_round, result='0')
+                                            Game.objects.create(tournament=queryset, player2=player2.player,
+                                                                round_number=curr_round, result='0')
                                             next_games.pop(0)
                                     else:
-                                        curr_round = Round.objects.get_or_create(tournament=queryset, round_number=r+1)
+                                        curr_round = Round.objects.get_or_create(tournament=queryset,
+                                                                                 round_number=r + 1)
                                         Game.objects.create(tournament=queryset, round_number=curr_round, result='0')
                                 else:
-                                    curr_round = Round.objects.get_or_create(tournament=queryset, round_number=r+1)
+                                    curr_round = Round.objects.get_or_create(tournament=queryset, round_number=r + 1)
                                     Game.objects.create(tournament=queryset, round_number=curr_round, result='0')
                             else:
-                                curr_round = Round.objects.get_or_create(tournament=queryset, round_number=r+1)
+                                curr_round = Round.objects.get_or_create(tournament=queryset, round_number=r + 1)
                                 Game.objects.create(tournament=queryset, round_number=curr_round, result='0')
             if queryset.play_type == 'RR':
                 s = []
@@ -820,15 +837,18 @@ class GenerateTournamentLadder(APIView):
                     lista1 = notifications[:mid]
                     lista2 = notifications[mid:]
                     lista2.reverse()
-                    curr_round, created = Round.objects.get_or_create(tournament=queryset, round_number=i+1)
+                    curr_round, created = Round.objects.get_or_create(tournament=queryset, round_number=i + 1)
                     print(curr_round)
                     for n in range(mid):
                         if lista1[n] == "":
-                            Game.objects.create(tournament=queryset, player1=lista2[n].player, round_number=curr_round, result='1')
+                            Game.objects.create(tournament=queryset, player1=lista2[n].player, round_number=curr_round,
+                                                result='1')
                         elif lista2[n] == "":
-                            Game.objects.create(tournament=queryset, player1=lista1[n].player, round_number=curr_round, result='1')
+                            Game.objects.create(tournament=queryset, player1=lista1[n].player, round_number=curr_round,
+                                                result='1')
                         else:
-                            Game.objects.create(tournament=queryset, player1=lista1[n].player, player2=lista2[n].player, round_number=curr_round, result='0')
+                            Game.objects.create(tournament=queryset, player1=lista1[n].player, player2=lista2[n].player,
+                                                round_number=curr_round, result='0')
                         s.append([lista1[n], lista2[n]])
                     notifications = przetasowanie(notifications)
 
@@ -839,4 +859,3 @@ class GenerateTournamentLadder(APIView):
         games = Game.objects.filter(tournament=queryset)
         queryset.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-

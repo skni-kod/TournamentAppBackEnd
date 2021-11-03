@@ -1,4 +1,5 @@
 from django.db.models.query import QuerySet
+from django_countries.serializers import CountryFieldMixin
 from rest_framework import serializers
 from sorl_thumbnail_serializer.fields import HyperlinkedSorlImageField
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -42,7 +43,7 @@ class ShortUserSerializer(serializers.ModelSerializer):
         fields = ('email', 'first_name', 'last_name')
 
 
-class ProfileForGameSerializer(serializers.ModelSerializer):
+class ProfileForGameSerializer(CountryFieldMixin, serializers.ModelSerializer):
     user = ShortUserSerializer()
 
     class Meta:
@@ -50,13 +51,13 @@ class ProfileForGameSerializer(serializers.ModelSerializer):
         fields = ('id', 'user', 'rating', 'country', 'club')
 
 
-class ClubSerializer(serializers.ModelSerializer):
+class ClubSerializer(CountryFieldMixin,serializers.ModelSerializer):
     class Meta:
         model = Club
         fields = ('id', 'club_name', 'club_info', 'club_logo', 'country')
 
 
-class ProfileWithoutUserSerializer(serializers.ModelSerializer):
+class ProfileWithoutUserSerializer(CountryFieldMixin, serializers.ModelSerializer):
     club = ClubSerializer()
 
     class Meta:
@@ -85,7 +86,7 @@ class GallerySerializer(serializers.ModelSerializer):
         fields = ('id', 'image')
 
 
-class ProfileSerializer(serializers.ModelSerializer):
+class ProfileSerializer(CountryFieldMixin, serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     club = ClubSerializer()
 
@@ -94,7 +95,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = ('id', 'user', 'rating', 'country', 'club')
 
 
-class ShortProfileSerializer(serializers.ModelSerializer):
+class ShortProfileSerializer(CountryFieldMixin, serializers.ModelSerializer):
     first_name = serializers.CharField(source="user.first_name")
     last_name = serializers.CharField(source="user.last_name")
     club = serializers.CharField(source="club.name", allow_null=True)
@@ -119,7 +120,7 @@ class JudgeSaveSerializer(serializers.ModelSerializer):
         fields = ('id', 'user', 'judge_category')
         
         
-class TournamentSerializer(serializers.ModelSerializer):
+class TournamentSerializer(CountryFieldMixin, serializers.ModelSerializer):
     gallery = GallerySerializer()
 
     class Meta:
@@ -249,7 +250,7 @@ class TournamentPlayerNotificationsSerializer(serializers.ModelSerializer):
         fields = ('id', 'notification')
 
 
-class TournamentSaveSerializer(serializers.ModelSerializer):
+class TournamentSaveSerializer(CountryFieldMixin, serializers.ModelSerializer):
 
     class Meta:
         model = TournamentInfo
@@ -266,7 +267,7 @@ class GallerySaveSerializer(serializers.ModelSerializer):
         fields = ()
 
 
-class ProfileForRegistrationSerializer(serializers.ModelSerializer):
+class ProfileForRegistrationSerializer(CountryFieldMixin, serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ('gender', 'country', 'club')

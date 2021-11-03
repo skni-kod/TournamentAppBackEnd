@@ -10,6 +10,7 @@ from rest_framework import permissions
 from sorl.thumbnail import ImageField
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import Group
+from django_countries.fields import CountryField
 
 """CUSTOM USER MODEL"""
 
@@ -67,7 +68,7 @@ class Club(models.Model):
     club_name = models.CharField(max_length=255)
     club_info = models.TextField(max_length=500, blank=True)
     club_logo = models.ImageField(upload_to='club_logo/', blank=True)
-    country = models.CharField(max_length=60)
+    country = CountryField()
 
     def __str__(self):
         return self.club_name
@@ -77,7 +78,7 @@ class Profile(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='profile')
     category = models.CharField(max_length=20, blank=True)
     rating = models.SmallIntegerField(default=0)
-    country = models.CharField(max_length=60)
+    country = CountryField()
     gender = models.CharField(max_length=1, choices=(('M', 'M'), ('F', 'F')), blank=True)
     club = models.ForeignKey(Club, on_delete=models.CASCADE, blank=True, null=True)
 
@@ -126,7 +127,7 @@ class TournamentInfo(models.Model):
     lose_points = models.FloatField(validators=[MinValueValidator(0)], default=0)
     draw_points = models.FloatField(validators=[MinValueValidator(0)], default=1)
     bye_points = models.FloatField(validators=[MinValueValidator(0)], default=0.5)
-    country = models.CharField(max_length=60)
+    country = CountryField()
     gallery = models.ForeignKey(Gallery, on_delete=models.CASCADE, blank=True, related_name='tournament', null=True)
     judge = models.ForeignKey(Judge, on_delete=models.CASCADE, related_name='judge', null=True)
 
