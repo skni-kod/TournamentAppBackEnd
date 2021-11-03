@@ -457,8 +457,7 @@ class TournamentNotificationViewSetDetail(APIView):
 
     def get(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        if (
-                request.user.email != queryset.player.user.email and request.user.email != queryset.tournament.judge.user.email and request.user.is_superuser == False):
+        if queryset.player.user.email != request.user.email and request.user.email != queryset.tournament.judge.user.email and request.user.is_superuser == False:
             raise PermissionDenied()
         serializer = TournamentNotificationSerializer(queryset)
         return Response(serializer.data)
