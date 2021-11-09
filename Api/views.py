@@ -3,6 +3,7 @@ from django.db.models import query
 import numpy
 from django.http import Http404
 from rest_framework import status
+from rest_framework.serializers import Serializer
 from rest_framework.views import APIView
 from Api.serializers import *
 from Api.models import *
@@ -13,6 +14,15 @@ from django.contrib.auth.models import User
 from Api.permissions import *
 from Api.decorators import method_permission_classes
 from django.core.exceptions import PermissionDenied
+
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.utils.encoding import smart_str, force_str, smart_bytes, DjangoUnicodeDecodeError
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from rest_framework import generics
+from django.contrib.sites.shortcuts import get_current_site
+from django.urls import reverse
+from .utils import Util
+from django.shortcuts import redirect
 
 
 def przetasowanie(lista):
@@ -858,3 +868,41 @@ class GenerateTournamentLadder(APIView):
         games = Game.objects.filter(tournament=queryset)
         queryset.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ResetPassword(generics.GenericAPIView):
+    serializer_class = ResetPasswordEmailRequestSerializer
+
+    def post(self, request):
+        email = request.data.get('email', '')
+        if CustomUser.objects.filter(email=email).exists():
+            user = CustomUser.objects.get(email=email)
+            uidb64 = urlsafe_base64_encode(smart_bytes(user.id))
+            token = PasswordResetTokenGenerator().make_token(user)
+            current_site = get_current_site(request=request).domain
+            relativeLink = reverse('password-reset-confirm', kwargs={'uidb64': uidb64, 'token': token})
+            redirect_url = request.data.get('redirect_url', '')
+            absurl = 'http://'+current_site + relativeLink
+            email_body = 'Hello, \n Use link below to reset your password  \n' + \
+                absurl+"?redirect_url="+redirect_url
+            data = {'email_body': email_body, 'to_email': user.email,
+                    'email_subject': 'Reset your passsword'}
+            Util.send_email(data)
+            return Response({'Success': 'We have sent you a link to reset your password'}, status=status.HTTP_200_OK)
+        return Response({'Error': 'Incorrect email'}, status=status.HTTP_200_OK)
+        
+
+class ChangePassword(generics.GenericAPIView):
+    serializer_class = SetNewPasswordSerializer
+
+    def get(self, request, uidb64, token):
+        id = smart_str(urlsafe_base64_decode(uidb64))
+        user = CustomUser.objects.get(id=id)
+        if not PasswordResetTokenGenerator().check_token(user, token):
+            return Response({'Error': 'Token is not valid, please, try again'})
+        return Response ({'Success': True, 'message':'Credentials Valid', 'uidb64':uidb64, 'token':token})
+    
+    def patch(self, request, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response({'success': True, 'message': 'Password reset success'}, status=status.HTTP_200_OK)

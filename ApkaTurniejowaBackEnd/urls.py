@@ -43,6 +43,9 @@ urlpatterns = [
     url(r'^api/tournament_player_result/$', TournamentPlayerResultViewSetList.as_view(), name='Tournament_Player_Result'),
     url(r'^api/tournament_player_notifications/$', TournamentPlayerNotificationsViewSetList.as_view(), name='Tournament_Player_Notifications'),
     url(r'^api/generate/(?P<pk>\d+)/$', GenerateTournamentLadder.as_view(), name='generate'),
-    url('api-auth/', include('rest_framework.urls'))
+    url('api-auth/', include('rest_framework.urls')),
+    
+    url(r'reset_password/', ResetPassword.as_view(), name="request-reset-email"),
+    url(r'change_password/(?P<uidb64>[-\w]+)/(?P<token>[-\w]+)/$', ChangePassword.as_view(), name='password-reset-confirm'), 
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
