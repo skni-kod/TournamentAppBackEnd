@@ -123,7 +123,7 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 AUTH_USER_MODEL = 'Api.CustomUser'
 
 # Static files (CSS, JavaScript, Images)
@@ -142,7 +142,9 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ]
+    ],
+    'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.IsAdminUser',
+    ],
 }
 
 SIMPLE_JWT = {

@@ -43,6 +43,8 @@ urlpatterns = [
     url(r'^api/tournament_player_result/$', TournamentPlayerResultViewSetList.as_view(), name='Tournament_Player_Result'),
     url(r'^api/tournament_player_notifications/$', TournamentPlayerNotificationsViewSetList.as_view(), name='Tournament_Player_Notifications'),
     url(r'^api/generate/(?P<pk>\d+)/$', GenerateTournamentLadder.as_view(), name='generate'),
+    url(r'^api/section/$', SectionViewSetList.as_view(), name='Section_List'),
+    url(r'^api/section/(?P<pk>\d+)/$', SectionViewSetDetail.as_view(), name='Section_Detail'),
     url('api-auth/', include('rest_framework.urls'))
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

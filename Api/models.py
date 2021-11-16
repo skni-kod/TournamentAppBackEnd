@@ -127,7 +127,7 @@ class TournamentInfo(models.Model):
     lose_points = models.FloatField(validators=[MinValueValidator(0)], default=0)
     draw_points = models.FloatField(validators=[MinValueValidator(0)], default=1)
     bye_points = models.FloatField(validators=[MinValueValidator(0)], default=0.5)
-    country = CountryField()
+    country = CountryField(default="")
     gallery = models.ForeignKey(Gallery, on_delete=models.CASCADE, blank=True, related_name='tournament', null=True)
     judge = models.ForeignKey(Judge, on_delete=models.CASCADE, related_name='judge', null=True)
 
@@ -176,3 +176,7 @@ class TournamentNotification(models.Model):
     def __str__(self):
         return f'{self.player} {self.tournament}'
 
+
+class Section(models.Model):
+    title = models.TextField()
+    text = models.TextField()

@@ -13,6 +13,7 @@ admin.site.register(TournamentInfo)
 admin.site.register(TournamentNotification)
 admin.site.register(PlayerInTournamentResult)
 admin.site.register(Judge)
+admin.site.register(Section)
 
 
 class CustomUserAdmin(UserAdmin):
