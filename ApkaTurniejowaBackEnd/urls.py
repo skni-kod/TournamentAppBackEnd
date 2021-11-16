@@ -45,6 +45,8 @@ urlpatterns = [
     url(r'^api/generate/(?P<pk>\d+)/$', GenerateTournamentLadder.as_view(), name='generate'),
     url(r'^api/section/$', SectionViewSetList.as_view(), name='Section_List'),
     url(r'^api/section/(?P<pk>\d+)/$', SectionViewSetDetail.as_view(), name='Section_Detail'),
+    url(r'reset_password/', ResetPassword.as_view(), name="request-reset-email"),
+    url(r'change_password/(?P<uidb64>[-\w]+)/(?P<token>[-\w]+)/$', ChangePassword.as_view(), name='password-reset-confirm'), 
     url('api-auth/', include('rest_framework.urls'))
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
