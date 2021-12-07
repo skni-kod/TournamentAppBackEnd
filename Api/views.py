@@ -58,8 +58,8 @@ class ProfileViewSetDetail(APIView):
     get_permission = 'IsAuthorised'
     put_permission = 'IsAdmin'
     post_permission = 'IsNotAuthorised'
-    patch_permission = 'IsOwner'
-    delete_permission = 'IsOwner'
+    patch_permission = 'IsProfileOwner'
+    delete_permission = 'IsProfileOwner'
     options_permission = 'IsAdmin'
 
     def get_object(self, pk):

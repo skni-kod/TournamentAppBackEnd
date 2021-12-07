@@ -34,11 +34,11 @@ class ApiPermissions(permissions.BasePermission):
             if type(request.user) is AnonymousUser:
                 return False
             else:
-                return (request.user.email == obj.player.user.email) or request.user.is_superuser == True
+                return (request.user.email == obj.player.user.email) or request.user.groups.filter(name='Judges').exists() or request.user.is_superuser == True
         elif permission == 'IsTournamentJudge':
             if type(request.user) is AnonymousUser:
                 return False
             else:
                 return (request.user.email == obj.judge.user.email) or request.user.is_superuser == True
         else:
-            return True
+            return False
