@@ -3,20 +3,20 @@ from django.contrib.auth.models import AnonymousUser
 
 
 class ApiPermissions(permissions.BasePermission):
-    get_permission = None
-    put_permission = None
-    post_permission = None
-    patch_permission = None
-    delete_permission = None
+    get_permission = 'IsAdmin'
+    put_permission = 'IsAdmin'
+    post_permission = 'IsAdmin'
+    patch_permission = 'IsAdmin'
+    delete_permission = 'IsAdmin'
     option_permission = 'IsAdmin'
 
     def has_object_permission(self, request, view, obj):
         permission_name = f'{request.method.lower()}_permission'
         permission = getattr(view, permission_name)
         if permission == 'IsAuthorised':
-            return type(request.user) is not AnonymousUser
+            return bool(type(request.user) is not AnonymousUser)
         if permission == 'IsNotAuthorised':
-            return type(request.user) is AnonymousUser or request.user.id == obj.id or request.user.groups.filter(name='Judges').exists() or request.user.is_superuser == True
+            return bool(type(request.user) is AnonymousUser) or request.user.id == obj.id or request.user.groups.filter(name='Judges').exists() or request.user.is_superuser == True
         elif permission == 'IsOwner':
             return request.user.id == obj.id or request.user.groups.filter(name='Judges').exists() or request.user.is_superuser == True
         elif permission == 'IsJudge':
