@@ -36,6 +36,9 @@ def przetasowanie(lista):
 class ProfileViewSetList(APIView):
     queryset = Profile.objects.none()
     permission_classes = (ApiPermissions,)
+    get_permission = 'IsAuthorised'
+    post_permission = 'IsNotAuthorised'
+    options_permission = 'IsAdmin'
 
     def get(self, format=None):
         queryset = Profile.objects.all().order_by('id')
