@@ -172,7 +172,7 @@ class TournamentViewSetList(APIView):
     def get(self, format=None):
         queryset = TournamentInfo.objects.all().order_by('id')
         self.check_object_permissions(self.request, queryset)
-        serializer = TournamentSerializer(queryset, many=True)
+        serializer = TournamentListSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def post(self, request):
@@ -200,7 +200,7 @@ class TournamentViewSetDetail(APIView):
 
     def get(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        serializer = TournamentSerializer(queryset)
+        serializer = TournamentDetailSerializer(queryset)
         return Response(serializer.data)
 
     def put(self, request, pk=None, format=None):
@@ -295,11 +295,11 @@ class ClubViewSetList(APIView):
     def get(self, format=None):
         queryset = Club.objects.all().order_by('id')
         self.check_object_permissions(self.request, queryset)
-        serializer = ClubSerializer(queryset, many=True)
+        serializer = ClubListSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def post(self, request):
-        serializer = ClubSerializer(data=request.data)
+        serializer = ClubDetailSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -323,12 +323,12 @@ class ClubViewSetDetail(APIView):
 
     def get(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        serializer = ClubSerializer(queryset)
+        serializer = ClubDetailSerializer(queryset)
         return Response(serializer.data)
 
     def put(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        serializer = ClubSerializer(queryset)
+        serializer = ClubDetailSerializer(queryset)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -341,7 +341,7 @@ class ClubViewSetDetail(APIView):
 
     def patch(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
-        serializer = ClubSerializer(queryset, data=request.data, partial=True)
+        serializer = ClubDetailSerializer(queryset, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -760,7 +760,26 @@ class TournamentPlayerNotificationsViewSetList(APIView):
         return Response(serializer.data)
 
 
+class TournamentPlayerNotificationsViewSetDetail(APIView):
+    permission_classes = (ApiPermissions,)
+    get_permission = 'IsAuthorised'
+
+    def get_object(self, pk):
+        try:
+            return TournamentInfo.objects.get(pk=pk)
+        except TournamentInfo.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk=None, format=None):
+        queryset = self.get_object(pk)
+        serializer = TournamentPlayerNotificationsSerializer(queryset)
+        return Response(serializer.data)
+
+
 class GenerateTournamentLadder(APIView):
+    permission_classes = (ApiPermissions,)
+    get_permission = 'IsJudge'
+    put_permission = 'IsJudge'
 
     def get_object(self, pk):
         try:
@@ -921,8 +940,10 @@ class GenerateTournamentLadder(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-
 class SectionViewSetList(APIView):
+    permission_classes = (ApiPermissions,)
+    get_permission = 'IsNotAuthorised'
+    post_permission = 'IsAdmin'
 
     def get(self, format=None):
         queryset = Section.objects.all().order_by('id')
@@ -939,6 +960,12 @@ class SectionViewSetList(APIView):
 
 
 class SectionViewSetDetail(APIView):
+    permission_classes = (ApiPermissions,)
+    get_permission = 'IsNotAuthorised'
+    put_permission = 'IsAdmin'
+    patch_permission = 'IsAdmin'
+    delete_permission = 'IsAdmin'
+    options_permission = 'IsAdmin'
 
     def get_object(self, pk):
         try:
@@ -946,12 +973,10 @@ class SectionViewSetDetail(APIView):
         except Section.DoesNotExist:
             raise Http404
 
-
     def get(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         serializer = SectionSerializer(queryset)
         return Response(serializer.data)
-
 
     def put(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
@@ -961,12 +986,10 @@ class SectionViewSetDetail(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
     def delete(self, request, pk=None, format=None):
         queryset = self.get_object(pk)
         queryset.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
 
     def patch(self, request, pk=None, format=None):
         queryset = self.get_object(pk)

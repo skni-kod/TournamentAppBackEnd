@@ -67,6 +67,7 @@ class CustomUser(AbstractUser):
 class Club(models.Model):
     club_name = models.CharField(max_length=255)
     club_info = models.TextField(max_length=500, blank=True)
+    club_info_short = models.TextField(max_length=200, blank=True)
     club_logo = models.ImageField(upload_to='club_logo/', blank=True)
     country = CountryField()
 
@@ -80,10 +81,10 @@ class Profile(models.Model):
     rating = models.SmallIntegerField(default=0)
     country = CountryField()
     gender = models.CharField(max_length=1, choices=(('M', 'M'), ('F', 'F')), blank=True)
-    club = models.ForeignKey(Club, on_delete=models.CASCADE, blank=True, null=True)
+    club = models.ForeignKey(Club, on_delete=models.CASCADE, blank=True, null=True, related_name='profile')
 
     def __str__(self):
-        return f'{self.user.first_name} {self.user.last_name}'
+        return f'{self.id} {self.user.first_name} {self.user.last_name}'
 
 
 class Judge(models.Model):
@@ -178,5 +179,7 @@ class TournamentNotification(models.Model):
 
 
 class Section(models.Model):
+    id = models.CharField(max_length=20, primary_key=True)
     title = models.TextField()
     text = models.TextField()
+

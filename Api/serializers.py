@@ -48,6 +48,26 @@ class ShortUserSerializer(serializers.ModelSerializer):
         fields = ('email', 'first_name', 'last_name')
 
 
+class ShortProfileSerializer(CountryFieldMixin, serializers.ModelSerializer):
+    first_name = serializers.CharField(source="user.first_name")
+    last_name = serializers.CharField(source="user.last_name")
+
+    class Meta:
+        model = Profile
+        fields = ('id', 'first_name', 'last_name', 'country', 'rating')
+
+
+class ShortProfileWithClubSerializer(CountryFieldMixin, serializers.ModelSerializer):
+    first_name = serializers.CharField(source="user.first_name")
+    last_name = serializers.CharField(source="user.last_name")
+    club_name = serializers.CharField(source="club.club_name")
+    club_id = serializers.IntegerField(source="club.id")
+
+    class Meta:
+        model = Profile
+        fields = ('id', 'first_name', 'last_name', 'country', 'rating', 'club_id', 'club_name')
+
+
 class ProfileForGameSerializer(CountryFieldMixin, serializers.ModelSerializer):
     user = ShortUserSerializer()
 
@@ -56,14 +76,22 @@ class ProfileForGameSerializer(CountryFieldMixin, serializers.ModelSerializer):
         fields = ('id', 'user', 'rating', 'country', 'club')
 
 
-class ClubSerializer(CountryFieldMixin,serializers.ModelSerializer):
+class ClubListSerializer(CountryFieldMixin, serializers.ModelSerializer):
     class Meta:
         model = Club
-        fields = ('id', 'club_name', 'club_info', 'club_logo', 'country')
+        fields = ('id', 'club_name', 'club_info_short', 'country')
+
+
+class ClubDetailSerializer(CountryFieldMixin, serializers.ModelSerializer):
+    members = ShortProfileSerializer(many=True, source='profile')
+
+    class Meta:
+        model = Club
+        fields = ('id', 'club_name', 'club_info', 'club_logo', 'country', 'members')
 
 
 class ProfileWithoutUserSerializer(CountryFieldMixin, serializers.ModelSerializer):
-    club = ClubSerializer()
+    club = ClubDetailSerializer()
 
     class Meta:
         model = Profile
@@ -92,22 +120,19 @@ class GallerySerializer(serializers.ModelSerializer):
 
 
 class ProfileSerializer(CountryFieldMixin, serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
-    club = ClubSerializer()
+    email = serializers.CharField(source='user.email')
+    first_name = serializers.CharField(source='user.first_name')
+    last_name = serializers.CharField(source='user.last_name')
+    is_judge = serializers.SerializerMethodField()
+    club_id = serializers.IntegerField(source='club.id')
+    club_name = serializers.CharField(source='club.club_name', allow_null=True)
 
     class Meta:
         model = Profile
-        fields = ('id', 'user', 'rating', 'country', 'club')
+        fields = ('id', 'email', 'first_name', 'last_name', 'is_judge', 'rating', 'country', 'club_id', 'club_name')
 
-
-class ShortProfileSerializer(CountryFieldMixin, serializers.ModelSerializer):
-    first_name = serializers.CharField(source="user.first_name")
-    last_name = serializers.CharField(source="user.last_name")
-    club = serializers.CharField(source="club.name", allow_null=True)
-
-    class Meta:
-        model = Profile
-        fields = ('id', 'first_name', 'last_name', 'country', 'rating', 'club')
+    def get_is_judge(self, obj):
+        return obj.user.groups.filter(name='Judges').exists()
 
 
 class JudgeSerializer(serializers.ModelSerializer):
@@ -123,9 +148,16 @@ class JudgeSaveSerializer(serializers.ModelSerializer):
     class Meta:
         model = Judge
         fields = ('id', 'user', 'judge_category')
-        
-        
-class TournamentSerializer(CountryFieldMixin, serializers.ModelSerializer):
+
+
+class TournamentListSerializer(CountryFieldMixin, serializers.ModelSerializer):
+
+    class Meta:
+        model = TournamentInfo
+        fields = ('id', 'name', 'play_type', 'country')
+
+
+class TournamentDetailSerializer(CountryFieldMixin, serializers.ModelSerializer):
     gallery = GallerySerializer()
 
     class Meta:
@@ -144,8 +176,8 @@ class ShortTournamentSerializer(serializers.ModelSerializer):
 
 class GameSerializer(serializers.ModelSerializer):
     tournament = ShortTournamentSerializer()
-    player1 = ProfileForGameSerializer()
-    player2 = ProfileForGameSerializer()
+    player1 = ShortProfileSerializer()
+    player2 = ShortProfileSerializer()
     round_number = serializers.SerializerMethodField()
 
     class Meta:
@@ -156,10 +188,16 @@ class GameSerializer(serializers.ModelSerializer):
         return obj.round_number.round_number
 
 
+class TNSerializer(serializers.ModelSerializer):
+    player = ShortProfileWithClubSerializer()
+
+    class Meta:
+        model = TournamentNotification
+        fields = ('id', 'player')
 
 
 class TournamentNotificationSerializer(serializers.ModelSerializer):
-    player = ShortProfileSerializer()
+    player = ShortProfileWithClubSerializer()
     tournament = ShortTournamentSerializer()
 
     class Meta:
@@ -248,7 +286,7 @@ class TournamentPlayerResultSerializer(serializers.ModelSerializer):
 
 
 class TournamentPlayerNotificationsSerializer(serializers.ModelSerializer):
-    notification = TournamentNotificationSerializer(many=True, source='notifications')
+    notification = TNSerializer(many=True, source='notifications')
 
     class Meta:
         model = TournamentInfo
@@ -296,7 +334,7 @@ class UserProfileSaveSerializer(serializers.ModelSerializer):
 class SectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Section
-        fields = "__all__"
+        fields = ('id', 'title', 'text')
 
 
 
